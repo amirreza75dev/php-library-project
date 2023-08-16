@@ -1,0 +1,207 @@
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+
+}
+
+
+body{
+    height: 100%;
+}
+
+/* login and register page css */
+
+
+.login-container{
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    height: 400px;
+    margin: 0 auto;
+    margin-top: 50px;
+}
+
+
+.login-container input{
+    width: 100%;
+    margin: 10px auto;
+    padding: 10px 0;
+}
+
+.radio-btns {
+    width: 50%;
+    margin: 10px auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.radio-btns input{
+    width: fit-content;
+}
+
+#log-btn{
+    width: 50%;
+    margin: 0 auto;
+    padding: 10px 0;
+}
+
+.pass-warning-box{
+    background-color: rgb(223, 135, 135);
+    margin: 10px 0;
+    font-size: 1.2em;
+    
+
+}
+
+.pass-warning-box p{
+    display: none;
+}
+
+.invalid{
+    background-color: rgb(223, 135, 135);
+    margin: 10px 0;
+    font-size: 1.2em;
+}
+.invalid p{
+    display: none;
+}
+
+/* employee */
+
+tr:nth-child(even){
+    background-color: #dddddd;
+}
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 60%;
+    margin: 0 auto;
+  }
+  
+td, th{
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+
+
+
+.requests img{
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 30px;
+    cursor: pointer;
+
+}
+
+
+.add-books{
+    width: 60%;
+    margin: 30px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+.add-books label{
+    margin: 10px 0;
+    
+    
+  }
+.add-books input{
+    padding: 10px 0;
+    display: block;
+    
+  }
+
+/* user */
+ .requests_user table{
+      max-height: 100vh;
+      scroll-behavior: smooth;
+      overflow-y: scroll;
+      margin: 20px;
+  }
+
+  .requests_user img{
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 30px;
+    cursor: pointer;
+}
+
+
+.search-book{
+    margin: 20px;
+}
+.search-book input{
+    padding: 20px;
+    border: 1px black solid;
+}
+
+.main{
+    position: relative;
+}
+
+
+
+#orders{
+    width: 300px;
+    min-height: 500px;
+    position: absolute;
+    top: 0;
+    right: 0;
+
+}
+
+#orders img{
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 30px;
+    cursor: pointer;
+}
+#orders div{
+    margin: 10px 0;
+    background-color: #dddddd;
+}
+.order-box{
+    display: block;
+}
+
+
+#book-inf{
+    display: flex;
+    justify-content: space-between;
+    background-color: #dddddd;
+    flex-direction: column;
+}
+
+
+#waiting-requests{
+    margin: 20px auto;
+    border: 1px solid black;
+    width: 30%;
+    
+
+
+
+}
+#waiting-requests div{
+    display: flex;
+}
+#waiting-requests p{
+    border-bottom: 1px red solid;
+    flex: 3;
+
+}
+#waiting-requests span{
+    border-bottom: 1px red solid;
+    flex: 1;
+    border-left: 1px red solid;
+
+}
