@@ -27,8 +27,14 @@
             <label for="book-name">book name
                 <input id="book-name" type="text">
             </label>
-            <label for="section-id">section id
-                <input id="section-id" type="number">
+            <label for="section-id">section name </br>
+            <select name="section" id="section_name">
+                <option info="1" value="fiction">fiction</option>
+                <option info="2" value="science">science</option>
+                <option info="3" value="history">history</option>
+                <option info="4" value="romance">romance</option>
+                <option info="5" value="mystery">mystery</option>
+            </select>
             </label> 
             <label for="author-id">author id
                 <input id="author-id" type="number">

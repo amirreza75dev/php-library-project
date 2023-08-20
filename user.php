@@ -10,7 +10,12 @@
 <body>
 <div class="main">
         <div class="requests_user">
-            <div class="search-book"><input type="text" placeholder="search book"></div>
+            <div class="search-book">
+
+                <input id='search' type="text" placeholder="search books">
+                <div class="search-info">rtfgbgbggdb</div>
+            
+            </div>
             <div id="orders">
                 <div>your orders</div>
                 <div id="book-inf"></div>
@@ -20,6 +25,12 @@
 
             </div>
             <table id="data-container">
+                    <tr>
+                        <th>author</th>
+                        <th>book name</th>
+                        <th>request</th>
+                    </tr>
+
 
 
 
@@ -28,7 +39,7 @@
 
             <div id="waiting-requests">
                 <div>
-                     <p>requests waiting for approval</p><span>status</span>
+                     <p>requests</p><span>status</span>
                 </div>
 
 

@@ -15,7 +15,7 @@ $(function() {
         };
         
             $.ajax({
-                url: './controler/login-controler.php',
+                url: './includes/ajaxCalls.php?action=login',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(dataToSend),

@@ -2,12 +2,12 @@ $(function() {
  
     // Make an AJAX GET request
     $.ajax({
-        url: './controler/books-controler.php', // Replace with your server-side script URL
+        url: './includes/ajaxCalls.php?action=books', // Replace with your server-side script URL
         type: 'GET',
         dataType: 'html', // Expected data type (can be 'html', 'json', etc.)
         success: function(response) {
             // Insert the response data into the data-container div
-            $('#data-container').html(response);
+            $('#data-container').append(response);
             // Attach click event using event delegation to dynamically created elements
             $('#data-container').on('click', '.book-req', function() {
                 var bookName = $(this).parent().prev().text();
@@ -48,7 +48,7 @@ $(function() {
 
     function checkForUpdates() {
         $.ajax({
-            url: './controler/user-request-controler.php', // Endpoint to check for updates
+            url: './includes/ajaxCalls.php?action=readUserRequest', // Endpoint to check for updates
             type: 'GET',
             success: function(response) {
                 // Update user page content based on the response
@@ -111,12 +111,12 @@ $(function() {
         }
         // sending ajax requests to request-controler
         $.ajax({
-            url: './controler/request-controler.php',
+            url: './includes/ajaxCalls.php?action=requestedBooks',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(requestedBooks),
             success: function(response) {
-                
+                console.log(response);
                 var parsedResponse = JSON.parse(response);
                 
                 if(parsedResponse.message == "successful"){
@@ -128,10 +128,37 @@ $(function() {
             }
         });
 
+    })
+
+    // search functionality
+    $('#search').on('keyup',function(){
+        var searchValue = $('#search').val().toLowerCase();
+        console.log(searchValue);
+        $('#data-container tr').each(function(index){
+            // Skip the first row with th tags
+            if (index === 0) {
+                return true; // Continue to the next iteration
+            }
+            var bookName = $(this).find('td:eq(1)').text().toLowerCase();
+
+            console.log(bookName);
+            if (bookName.indexOf(searchValue) === -1) {
+                $(this).hide();
+            } else {
+                $(this).show();
+            }
+            
 
 
 
-        
+
+        }
+
+        )
+
+
+
+
 
 
     })
@@ -152,3 +179,6 @@ function cancelOrder(e){
     var item= $(e.target).parent();
     item.remove()
 }
+
+
+//search function 

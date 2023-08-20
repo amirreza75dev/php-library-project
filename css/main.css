@@ -137,10 +137,20 @@ td, th{
 
 .search-book{
     margin: 20px;
+    position: relative;
 }
 .search-book input{
     padding: 20px;
     border: 1px black solid;
+}
+
+.search-info{
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 5;
+    background-color: #dddddd;
+
 }
 
 .main{
@@ -204,4 +214,10 @@ td, th{
     flex: 1;
     border-left: 1px red solid;
 
+}
+
+
+#section_name{
+    width: 160px;
+    height: 16px;
 }

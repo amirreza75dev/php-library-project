@@ -78,7 +78,7 @@ $(function() {
         
         
             $.ajax({
-                url: './controler/register-controler.php',
+                url: './includes/ajaxCalls.php?action=register',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(dataToSend),
@@ -89,6 +89,7 @@ $(function() {
                     if(parsedResponse.message == "successful"){
                         window.location.href = './login.php';
                     }else{
+                        
                         console.log(parsedResponse.message);
                     }
                 }
