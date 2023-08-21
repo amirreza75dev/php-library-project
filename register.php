@@ -18,11 +18,11 @@
         <label for="user-btn">User
             <input type="radio" id="user-btn" name="role" value="user" required>
         </label>
-        
+
         <label for="employee-btn">employee
-        <input type="radio" id="employee-btn" name="role" value="employee" required>
+            <input type="radio" id="employee-btn" name="role" value="employee" required>
         </label>
-    
+
     </div>
     <input id="pass" type="password" class="pwd" placeholder="enter password" onkeyup="checkPasswordStrength();">
     <input id="pass-check" type="password" class="pwd" placeholder="repeat password" onkeyup="checkPasswordRepeat();">
@@ -39,6 +39,6 @@
 </form>
 
 <script src="js/jquery.js"></script>
-<script src="js/register.js"></script>
+<script src="js/jquery.library.js"></script>
 </body>
 </html>

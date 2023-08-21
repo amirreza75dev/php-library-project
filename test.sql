@@ -61,14 +61,10 @@ CREATE TABLE requests(
 
 CREATE TABLE lendings(
     lending_id int(10) PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    client_id int(10) NOT NULL,
     employee_id int(10) NOT NULL,
-    book_id int(10) NOT NULL,
     request_id int(10) NOT NULL,
     start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     end_date TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL 3 WEEK),
-    FOREIGN KEY (book_id) REFERENCES books(book_id),
-    FOREIGN KEY (client_id) REFERENCES clients(client_id),
     FOREIGN KEY (request_id) REFERENCES requests(request_id),
     FOREIGN KEY (employee_id) REFERENCES employees(employee_id)
 );
