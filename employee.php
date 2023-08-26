@@ -1,3 +1,7 @@
+<?php
+require_once './includes/functions.php';
+$sectionNames = getSectionNames();
+ ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -28,11 +32,13 @@
         </label>
         <label for="section-id">section name </br>
             <select name="section" id="section_name">
-                <option info="1" value="fiction">fiction</option>
-                <option info="2" value="science">science</option>
-                <option info="3" value="history">history</option>
-                <option info="4" value="romance">romance</option>
-                <option info="5" value="mystery">mystery</option>
+                <?php
+                 $html ="";
+                 foreach($sectionNames as $section){
+                    $html .= "<option value='". $section["section_id"]. "'>".$section['section_name']."</option>";
+                } 
+                 echo $html;
+                ?>
             </select>
         </label>
         <label for="author-id">author id
@@ -50,6 +56,7 @@
 </div>
 <script src="js/jquery.js"></script>
 <script src="js/jquery.library.js"></script>
+<script>readRequests();</script>
 </body>
 
 </html>

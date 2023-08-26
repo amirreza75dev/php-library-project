@@ -14,7 +14,6 @@
 
             <input id='search' type="text" placeholder="search books">
          
-
         </div>
         <div id="orders">
             <div>your orders</div>
@@ -46,6 +45,9 @@
 
     <script src="js/jquery.js"></script>
     <script src="js/jquery.library.js"></script>
+    <script>books();
+            checkForUpdates();
+    </script>
 
 </body>
 </html>
