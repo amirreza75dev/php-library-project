@@ -116,7 +116,7 @@ switch ($action) {
         }
         echo $html;
         break;
-    case 'UserRequest':
+    case 'userRequest':
         $clientId = $_SESSION['user_id'];
         $userRequests = getUserRequest($clientId);
         echo json_encode($userRequests);

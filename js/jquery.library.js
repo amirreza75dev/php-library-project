@@ -11,7 +11,7 @@ $(function () {
     //adding new book
     $("#submit-book").on("click", function (event) {
         event.preventDefault();
-        var sectionId = $('#section_name').find("option:selected").val()
+        var sectionId = $('#section-name').find("option:selected").val()
         var bookName = $("#book-name").val();
         var authorId = $("#author-id").val();
         var avl = $("#avl").val();
@@ -152,7 +152,7 @@ $(function () {
                 }
                 $(this).remove()
                 var html = ` <div  info = '${infoValue}'>
-                                <p>${name}</p><span>waiting</span>
+                                <p>${name}</p><span>pending</span>
                           </div>`
                 $('#waiting-requests').append(html);
             })
@@ -351,7 +351,7 @@ function books(){
     // Make an AJAX GET request
     function checkForUpdates() {
         $.ajax({
-            url: './includes/ajaxCalls.php?action=readUserRequest', // Endpoint to check for updates
+            url: './includes/ajaxCalls.php?action=userRequest', // Endpoint to check for updates
             type: 'GET',
             success: function (response) {
                 // Update user page content based on the response

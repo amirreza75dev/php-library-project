@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,23 +7,17 @@
     <link rel="stylesheet" href="css/main.css">
     <title>Register page</title>
 </head>
-
 <body>
-
-
     <form class="login-container">
         <input id="name" type="text" class="username" placeholder="enter name" required>
         <input id="email" type="email" class="username" placeholder="enter email" required>
-
         <div class="radio-btns">
             <label for="user-btn">User
                 <input type="radio" id="user-btn" name="role" value="user" required>
             </label>
-
             <label for="employee-btn">employee
                 <input type="radio" id="employee-btn" name="role" value="employee" required>
             </label>
-
         </div>
         <input id="pass" type="password" class="pwd" placeholder="enter password">
         <input id="pass-check" type="password" class="pwd" placeholder="repeat password">
@@ -36,12 +29,8 @@
             <p class="repeat-pass">password does not match</p>
         </div>
         <button id="register-btn" disabled>Registr</button>
-
-
     </form>
-
     <script src="js/jquery.js"></script>
     <script src="js/jquery.library.js"></script>
 </body>
-
 </html>

@@ -2,10 +2,10 @@
 // database connection
 function databaseConnection()
 {
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "library";
+    $servername = getenv('servername');
+    $username = getenv('username');
+    $password = getenv('');
+    $dbname = getenv('dbname');
     $pdo = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
     // Set the PDO error mode to exception
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -197,3 +197,16 @@ function getSectionNames()
     $bookSections = $stmt->fetchAll(PDO::FETCH_ASSOC);
     return $bookSections;
 }
+// server sent event connection
+function serverSentEventConnection(){
+    header('Content-Type: text/event-stream');
+    header('Cache-Control: no-cache');
+    header('Connection: keep-alive');
+}
+// checking requests status
+function getRequestsStatus(){
+    serverSentEventConnection();
+    $pdo = databaseConnection();
+
+}
+
