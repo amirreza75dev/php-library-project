@@ -23,7 +23,6 @@ switch ($action) {
         } else {
             // retrieve information
             $userInf = loginClient($email);
-
             if ($userInf && password_verify($password, $userInf["password"])) {
                 $_SESSION['user_id'] = $userInf['client_id'];
                 $_SESSION['user_email'] = $userInf['email'];

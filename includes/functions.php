@@ -1,11 +1,24 @@
 <?php
+// Load environment variables from .env file
+function loadingEnvVars()
+{
+    $envFilePath = dirname(__DIR__) . '/.env';
+    if (file_exists($envFilePath)) {
+        $lines = file($envFilePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            list($name, $value) = explode('=', $line, 2);
+            $_ENV[$name] = $value;
+        }
+    }
+}
 // database connection
 function databaseConnection()
 {
-    $servername = getenv('servername');
-    $username = getenv('username');
-    $password = getenv('');
-    $dbname = getenv('dbname');
+    loadingEnvVars();
+    $servername = $_ENV['servername'];
+    $username = $_ENV['username'];
+    $password = '';
+    $dbname = $_ENV['dbname'];
     $pdo = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
     // Set the PDO error mode to exception
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -24,7 +37,6 @@ function addEmployee($name, $email, $pass)
     return true;
 }
 // login employee
-// login employee
 function loginEmployee($email)
 {
     $pdo = databaseConnection();
@@ -35,7 +47,6 @@ function loginEmployee($email)
     $employee = $stmt->fetch(PDO::FETCH_ASSOC);
     return $employee;
 }
-
 // add user
 function addClient($name, $email, $pass)
 {
@@ -48,8 +59,7 @@ function addClient($name, $email, $pass)
     $stmt->execute();
     return true;
 }
-
-// login employee
+// login client
 function loginClient($email)
 {
     $pdo = databaseConnection();
@@ -198,15 +208,15 @@ function getSectionNames()
     return $bookSections;
 }
 // server sent event connection
-function serverSentEventConnection(){
+function serverSentEventConnection()
+{
     header('Content-Type: text/event-stream');
     header('Cache-Control: no-cache');
     header('Connection: keep-alive');
 }
 // checking requests status
-function getRequestsStatus(){
+function getRequestsStatus()
+{
     serverSentEventConnection();
     $pdo = databaseConnection();
-
 }
-
