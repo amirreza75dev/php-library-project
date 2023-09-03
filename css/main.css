@@ -117,6 +117,13 @@ td, th{
     display: block;
     
   }
+.requests{
+    text-align: center;
+}
+#approve-requests{
+    margin: 20px;
+    
+}
 
 /* user */
  .requests_user table{

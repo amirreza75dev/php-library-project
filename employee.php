@@ -1,6 +1,8 @@
 <?php
 require_once './includes/functions.php';
 $sectionNames = getSectionNames();
+$title = 'employee page';
+include './header.php';
  ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -16,6 +18,7 @@ $sectionNames = getSectionNames();
     <div class="requests">
         <table id="pending-requests">
         </table>
+        <button id="approve-requests">Approve Requests</button>
     </div>
     <form class="add-books">
         <div> Adding new book</div>
@@ -42,8 +45,5 @@ $sectionNames = getSectionNames();
         <button id="submit-book">ADD Book</button>
     </form>
 </div>
-<script src="js/jquery.js"></script>
-<script src="js/jquery.library.js"></script>
+<?php include './footer.php' ?>
 <script>readRequests();</script>
-</body>
-</html>

@@ -2,7 +2,8 @@
 function databaseConnection()
 {
     // database connection variables
-    $dataBaseConVars = parse_ini_file("../.env");
+    $envFilePath = __DIR__ . "/../.env";
+    $dataBaseConVars = parse_ini_file($envFilePath);
     $servername=$dataBaseConVars['servername'];
     $dbname=$dataBaseConVars['dbname'];
     $username=$dataBaseConVars['username'];
@@ -63,18 +64,21 @@ function books()
 {
     $pdo = databaseConnection();
     $sql = "
-                        SELECT 
-                            books.book_id,
-                            books.book_name,
-                            books.section_id,
-                            books.author_id,
-                            books.available_numbers,
-                            authors.author_name
-                        FROM
-                            books
-                        INNER JOIN
-                            authors ON books.author_id = authors.author_id
-                    ";
+                SELECT 
+                    books.book_id,
+                    books.book_name,
+                    books.section_id,
+                    books.author_id,
+                    books.available_numbers,
+                    authors.author_name
+                FROM
+                    books
+                INNER JOIN
+                    authors ON books.author_id = authors.author_id
+                WHERE
+                    books.available_numbers > 0;
+            ";
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -108,7 +112,7 @@ function addRequest($clientId, $bookId)
 }
 
 //read requests
-function getRequest()
+function getRequests()
 {
     $pdo = databaseConnection();
     $sql = "SELECT
@@ -207,4 +211,26 @@ function getRequestsStatus()
 {
     serverSentEventConnection();
     $pdo = databaseConnection();
+}
+// searching for th number of books available for lending
+function bookAvailabilityUpdate($updateStatement,$bookId){
+    $pdo = databaseConnection();
+    switch($updateStatement):
+        case 'increase':
+            $sql = "UPDATE books
+                    SET available_numbers = available_numbers + 1
+                    WHERE book_id = :bookId" ;
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':bookId', $bookId);
+            $stmt->execute();
+            break;
+        case 'decrease':
+            $sql = "UPDATE books
+                    SET available_numbers = available_numbers - 1
+                    WHERE book_id = :bookId" ;
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':bookId', $bookId);
+            $stmt->execute();
+            break;
+    endswitch;
 }

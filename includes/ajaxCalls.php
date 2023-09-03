@@ -57,7 +57,7 @@ switch ($action) {
     case 'readRequests':
         $employee_id = $_SESSION['employee_id'];
         // getting requests list from database
-        $bookArray = getRequest();
+        $bookArray = getRequests();
         $pendingRequests = [];
         foreach ($bookArray as $book) {
             if ($book['status'] == "pending") {
@@ -72,15 +72,17 @@ switch ($action) {
         $jsonData = file_get_contents('php://input');
         $data = json_decode($jsonData, true);
         $status = $data['status'];
-        $requestId = $data['requestID'];
-        $clientID = $data['clientID'];
-        $bookID = $data['bookID'];
+        $requestId = $data['requestId'];
+        $clientId = $data['clientId'];
+        $bookId = $data['bookId'];
         if ($status == "accepted") {
+            bookAvailabilityUpdate('decrease',$bookId);
             updateRequestStatus($status, $requestId);
             addLending($employeeId,$requestId);
             $message = array("message" => "lending request added");
             echo json_encode($message);
         } else {
+                bookAvailabilityUpdate('increase',$bookId);
             updateRequestStatus($status, $requestId);
             removeLending($requestId);
             $message = array("message" => "lending request removed");
@@ -107,11 +109,17 @@ switch ($action) {
             $bookId = $book['book_id'];
             $html .= "<tr info='$bookId'>
                                     <td>$bookAuthor</td>
-                                    <td>$bookName</td>
+                                    <td info='book-name'>$bookName</td>
+                                    <td>
+                                        <input type='date' id='start' name='start-date' min='".date('Y-m-d',strtotime('+1 day'))."' value='".date('Y-m-d',strtotime('+1 day'))."'>
+                                    </td>
+                                    <td>
+                                        <input type='date' id='end' name='end-date' value='".date('Y-m-d',strtotime('+3 weeks'))."'>                                 
+                                    </td>
                                     <td>
                                         <img class='book-req' src='./img/accept.png' alt='accept'>                                  
                                     </td>                               
-                     </tr>";
+                        </tr>";
         }
         echo $html;
         break;

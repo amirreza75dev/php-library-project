@@ -1,13 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/main.css">
-    <title>Welcome</title>
-</head>
-<body>
+<?php 
+$title = 'user page';
+include './header.php';
+?>
 <div class="main">
     <div class="requests_user">
         <div class="search-book">
@@ -22,6 +16,8 @@
             <tr>
                 <th>author</th>
                 <th>book name</th>
+                <th>start date</th>
+                <th>end date</th>
                 <th>request</th>
             </tr>
         </table>
@@ -31,10 +27,9 @@
             </div>
         </div>
     </div>
-    <script src="js/jquery.js"></script>
-    <script src="js/jquery.library.js"></script>
-    <script>books();
-            checkForUpdates();
-    </script>
-</body>
-</html>
+<?php include './footer.php' ?>
+ <!-- page specific js  -->
+<script>
+books();
+checkForUpdates();
+</script>

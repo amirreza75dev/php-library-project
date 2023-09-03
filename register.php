@@ -1,13 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/main.css">
-    <title>Register page</title>
-</head>
-<body>
+<?php 
+$title = 'register page';
+include './header.php';
+?>
     <form class="login-container">
         <input id="name" type="text" class="username" placeholder="enter name" required>
         <input id="email" type="email" class="username" placeholder="enter email" required>
@@ -30,7 +24,4 @@
         </div>
         <button id="register-btn" disabled>Registr</button>
     </form>
-    <script src="js/jquery.js"></script>
-    <script src="js/jquery.library.js"></script>
-</body>
-</html>
+<?php include './footer.php' ?>
