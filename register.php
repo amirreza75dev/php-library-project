@@ -2,12 +2,12 @@
 $title = 'register page';
 include './header.php';
 ?>
-    <form class="login-container">
-        <input id="name" type="text" class="username" placeholder="enter name" required>
-        <input id="email" type="email" class="username" placeholder="enter email" required>
+    <form class="register-container">
+        <input id="name" type="text" class="clientname" placeholder="enter name" required>
+        <input id="email" type="email" class="clientname" placeholder="enter email" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}" required>
         <div class="radio-btns">
-            <label for="user-btn">User
-                <input type="radio" id="user-btn" name="role" value="user" required>
+            <label for="client-btn">client
+                <input type="radio" id="client-btn" name="role" value="client" required>
             </label>
             <label for="employee-btn">employee
                 <input type="radio" id="employee-btn" name="role" value="employee" required>
@@ -22,6 +22,6 @@ include './header.php';
             <p class="special-char">password should cointain special characters</p>
             <p class="repeat-pass">password does not match</p>
         </div>
-        <button id="register-btn" disabled>Registr</button>
+        <button type="submit" id="register-btn" disabled>Registr</button>
     </form>
 <?php include './footer.php' ?>

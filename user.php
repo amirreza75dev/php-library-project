@@ -1,9 +1,14 @@
 <?php 
-$title = 'user page';
+session_start();
+if(!isset($_SESSION['clientId'])){
+    header('Location: login.php');
+    exit();
+}
+$title = 'client page';
 include './header.php';
 ?>
 <div class="main">
-    <div class="requests_user">
+    <div class="requests_client">
         <div class="search-book">
             <input id='search' type="text" placeholder="search books">
         </div>
@@ -22,9 +27,15 @@ include './header.php';
             </tr>
         </table>
         <div id="waiting-requests">
-            <div>
-                <p>requests</p><span>status</span>
-            </div>
+            <div>your requests status</div>
+            <table>
+                <tr>                
+                    <th>book name</th>
+                    <th>start date</th>
+                    <th>end date</th>
+                    <th>status</th>
+                </tr>
+            </table>
         </div>
     </div>
 <?php include './footer.php' ?>

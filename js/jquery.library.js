@@ -30,6 +30,7 @@ $(function () {
             data: JSON.stringify(requestData),
             success: function (response) {
                 console.log("Request processed successfully:", response);
+                alert('book added successfully');
             },
             error: function (xhr, status, error) {
                 console.error("Error processing request:", status, error);
@@ -37,7 +38,7 @@ $(function () {
         });
     });
     // login page javascripts
-    $('#log-btn').on('click', function (event) {
+    $('.login-container').on('submit', function (event) {
         console.log("hi");
         event.preventDefault();
         var email = $('#name').val().trim();
@@ -111,7 +112,7 @@ $(function () {
         }
     })
     // sending data to database with ajax 
-    $('#register-btn').on('click', function (event) {
+    $('.register-container').on('submit', function (event) {
         event.preventDefault();
         var name = $('#name').val().trim();
         var email = $('#email').val().trim();
@@ -123,12 +124,14 @@ $(function () {
             'password': password,
             'selectedRadio': selectedRadio
         };
+        console.log(dataToSend);
         $.ajax({
             url: './includes/ajaxCalls.php?action=register',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(dataToSend),
             success: function (response) {
+                console.log(dataToSend);
                 var parsedResponse = JSON.parse(response);
                 console.log(parsedResponse);
                 if (parsedResponse.message == "successful") {
@@ -139,7 +142,7 @@ $(function () {
             }
         });
     });
-    // user page javascripts    
+    // client page javascripts    
     // submit requests
     $('#submit-orders').on('click', function () {
         requestedBooks = []
@@ -148,12 +151,12 @@ $(function () {
                 var infoValue = $(this).attr('info');
                 var individualBookRequest = this;    
                 var bookRequested = false;
-                if ($('#waiting-requests').children().length > 1) {
-                    $('#waiting-requests').children().not(':first-child').each(function () {
+                var bookName = $(this).find('span').text()
+                if ($('#waiting-requests table').children().length > 1) {
+                    $('#waiting-requests table').children().not(':first-child').each(function () {
                         var bookInfoValue = $(this).attr('info');
                         if (bookInfoValue == infoValue) {
-                            console.log('i am in first');
-                            alert('You requested this book before');
+                            alert('You requested '+ bookName +' before');
                             $(individualBookRequest).remove();
                             bookRequested = true;
                             return false; // Exit the loop early
@@ -162,10 +165,13 @@ $(function () {
                 } 
                 if(!bookRequested){
                     addingRequest(individualBookRequest,infoValue);
-                    return false
                 }
+                
             });
-        }       
+            alert('your requests sent')
+        }else{
+            alert('please put your order first')
+        }      
     })
     // search functionality
     $('#search').on('keyup', function () {
@@ -186,11 +192,73 @@ $(function () {
         }
         )
     })
-    // cancle order function 
-    function cancelOrder(e) {
-        var item = $(e.target).parent();
-        item.remove()
-    }
+// searching client books in employee page
+    $('#submit-search-client').on('click', function (event) {
+        event.preventDefault();
+        var searchedValue = $('#search-client-input').val().toLowerCase();
+        var searchedValueObject={
+            "searchedValue": searchedValue
+        }
+        console.log(searchedValue);
+        $.ajax({
+            url: './includes/ajaxCalls.php?action=clientBooks', // Endpoint to check for updates
+            type: 'POST', //
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(searchedValueObject),
+            success: function (response) {
+                // Update client page content based on the response
+                // For example, update the request status dynamically
+                var html =`<tr>
+                                <th>book name</th>
+                                <th>start date</th>
+                                <th>end date</th>
+                            </tr>`;
+                if (response.data.length > 0) {
+                  (response.data).forEach(function (item) {
+                    html += `<tr>
+                                    <td>${item.book_name}</td>
+                                    <td>${item.start_date}</td>
+                                    <td>${item.end_date}</td>
+                                </tr>`;
+                  });
+                } else {
+                  html += `<tr>
+                                <td>No results found</td>
+                            </tr>`;
+                }
+                $('#client-books-table').html(html)
+            }
+        });
+    })
+    // cancel order by client
+    $('#orders').on('click','.cancel-order',function(){
+        $(this).parent().remove();
+    })
+    $('#received-btn').on('click',function(){
+        var bookId = $('#received-book-input').val();
+        var dataToSend = {
+            'bookId': bookId
+        }
+        $.ajax({
+            url: './includes/ajaxCalls.php?action=received',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(dataToSend),
+            success: function (response) {
+                var parsedResponse = JSON.parse(response);
+                if(parsedResponse.message == false){
+                    alert('we received this book before')
+                }else{
+                    alert('book received successfully')
+                }
+                
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX Error:', status, error);
+            }
+        });
+    })
 });
 //functions 
 function readRequests(){
@@ -248,7 +316,6 @@ function books() {
         dataType: 'html',
         success: function (response) {
             $('#data-container').append(response);
-
             // Attach click event using event delegation to dynamically created elements
             $('#data-container').on('click', '.book-req', function () {
                 var bookName = $(this).closest('tr').find("td[info='book-name']").text();
@@ -262,7 +329,7 @@ function books() {
                     // Create new HTML content
                     var orderedBookHtml = `<div info='${bookId}' class="order-box">
                         <span info-start='${startDate}' info-end='${endDate}' class="ordered-book">${bookName} </span>
-                        <img class="cancel-order" src="img/decline.jpg" alt="" onclick="cancelOrder(event)">     
+                        <img class="cancel-order" src="img/decline.jpg" alt="">     
                     </div>`;
                     // Loop through each element with the class 'order-box'
                     var requested = false;
@@ -290,20 +357,23 @@ function books() {
     // Make an AJAX GET request
     function checkForUpdates() {
         $.ajax({
-            url: './includes/ajaxCalls.php?action=userRequest', // Endpoint to check for updates
+            url: './includes/ajaxCalls.php?action=clientRequest', // Endpoint to check for updates
             type: 'GET',
             success: function (response) {
-                // Update user page content based on the response
+                // Update client page content based on the response
                 // For example, update the request status dynamically
                 var responseArray = JSON.parse(response);
                 responseArray.forEach(element => {
-                    var html = ` <div class="requested-book" info = '${element.book_id}'>
-                 <p>${element.book_name}</p><span>${element.status}</span>
-                                    </div>`;
-                    if ($('#waiting-requests').find(`div[info=${element.book_id}]`).length === 0) {
-                        $('#waiting-requests').append(html);
-                    } if ($('#waiting-requests').find(`div[info=${element.book_id}]`).length === 1) {
-                        $('#waiting-requests').find(`div[info=${element.book_id}]`).find('span').html(element.status)
+                    var html = ` <tr class="requested-book" info = '${element.book_id}'>
+                                    <td>${element.book_name}</td>
+                                    <td>${element.start_date}</td>
+                                    <td>${element.end_date}</td>
+                                    <td>${element.status}</td>
+                                </tr>`;
+                    if ($('#waiting-requests').find(`tr[info=${element.book_id}]`).length === 0) {
+                        $('#waiting-requests table').append(html);
+                    } if ($('#waiting-requests').find(`tr[info=${element.book_id}]`).length === 1) {
+                        $('#waiting-requests').find(`tr[info=${element.book_id}]`).find('td:last').html(element.status)
                     }
                 });
             },
@@ -321,12 +391,14 @@ function addingRequest(individualBookRequest,infoValue){
     if (infoValue) {
         requestedBooks.push({ "book": name, "book_id": infoValue, "startDate": startDate, "endDate": endDate });
     }
-    console.log(requestedBooks);
     $(individualBookRequest).remove()
-    var html = ` <div class="requested-book"  info = '${infoValue}'>
-                    <p>${name}</p><span>pending</span>
-                </div>`
-    $('#waiting-requests').append(html);
+    var html = ` <tr class="requested-book"  info = '${infoValue}'>
+                    <td>${name}</td>
+                    <td>${startDate}</td>
+                    <td>${endDate}</td>
+                    <td>pending</td>
+                </tr>`
+    $('#waiting-requests table').append(html);
                 // sending ajax requests to request-controler
                 $.ajax({
                     url: './includes/ajaxCalls.php?action=requestedBooks',
@@ -337,7 +409,7 @@ function addingRequest(individualBookRequest,infoValue){
                         console.log(response);
                         var parsedResponse = JSON.parse(response);
                         if (parsedResponse.message == "successful") {
-                            alert('requests send')
+                            console.log('requests send')
                         } else {
                             console.log(parsedResponse.message);
                         }
@@ -394,7 +466,7 @@ $('#approve-requests').on('click',function(){
         var requestId = $(element).attr("request_id");
         var requestData = {
             "requestId": requestId,
-            "status": status,
+            "status": 'rejected',
             "clientId": clientId,
             "bookId": bookId,
         };

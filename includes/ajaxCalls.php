@@ -1,7 +1,7 @@
 <?php
 require_once 'functions.php';
 session_start();
-$action = $_GET['action'];
+$action = $_REQUEST['action'];
 switch ($action) {
     case 'login':
         $jsonData = file_get_contents('php://input');
@@ -10,10 +10,10 @@ switch ($action) {
         $password = $data['password'];
         $selectedRadio = $data['selectedRadio'];
         if ($selectedRadio === "employee") {
-            $employeeInf = loginEmployee($email);
+            $employeeInf = getEmployee($email);
             if ($employeeInf && password_verify($password, $employeeInf["password"])) {
-                $_SESSION['employee_id'] = $employeeInf['employee_id'];
-                $_SESSION['employee_email'] = $employeeInf['email'];
+                $_SESSION['employeeId'] = $employeeInf['employee_id'];
+                $_SESSION['employeeEmail'] = $employeeInf['email'];
                 // Send a JSON response back to the client
                 $response = array('message' => 'successful', 'page' => './employee.php');
                 echo json_encode($response);
@@ -22,10 +22,10 @@ switch ($action) {
             }
         } else {
             // retrieve information
-            $userInf = loginClient($email);
-            if ($userInf && password_verify($password, $userInf["password"])) {
-                $_SESSION['user_id'] = $userInf['client_id'];
-                $_SESSION['user_email'] = $userInf['email'];
+            $clientInf = getClient($email);
+            if ($clientInf && password_verify($password, $clientInf["password"])) {
+                $_SESSION['clientId'] = $clientInf['client_id'];
+                $_SESSION['clientEmail'] = $clientInf['email'];
                 // Send a JSON response back to the client
                 $response = array('message' => 'successful', 'page' => './user.php');
                 echo json_encode($response);
@@ -55,9 +55,9 @@ switch ($action) {
         echo json_encode($response);
         break;
     case 'readRequests':
-        $employee_id = $_SESSION['employee_id'];
+        $employeeId = $_SESSION['employeeId'];
         // getting requests list from database
-        $bookArray = getRequests();
+        $bookArray = getBookRequests();
         $pendingRequests = [];
         foreach ($bookArray as $book) {
             if ($book['status'] == "pending") {
@@ -67,7 +67,7 @@ switch ($action) {
         echo json_encode($pendingRequests);
         break;
     case 'lending':
-        $employeeId = $_SESSION['employee_id'];
+        $employeeId = $_SESSION['employeeId'];
         // Get JSON data from the client
         $jsonData = file_get_contents('php://input');
         $data = json_decode($jsonData, true);
@@ -82,7 +82,6 @@ switch ($action) {
             $message = array("message" => "lending request added");
             echo json_encode($message);
         } else {
-                bookAvailabilityUpdate('increase',$bookId);
             updateRequestStatus($status, $requestId);
             removeLending($requestId);
             $message = array("message" => "lending request removed");
@@ -101,13 +100,15 @@ switch ($action) {
         echo json_encode($message);
         break;
     case 'books':
-        $bookArray = books();
+        $bookArray = getAllbooks();
         $html = '';
         foreach ($bookArray as $book) {
             $bookName = $book['book_name'];
             $bookAuthor = $book['author_name'];
             $bookId = $book['book_id'];
-            $html .= "<tr info='$bookId'>
+            $bookAvailableNumbers= $book['available_numbers'];
+            $trId = ($bookAvailableNumbers < 1)? 'notAvailable': '';
+            $html .= "<tr info='$bookId' id='$trId'>
                                     <td>$bookAuthor</td>
                                     <td info='book-name'>$bookName</td>
                                     <td>
@@ -123,21 +124,42 @@ switch ($action) {
         }
         echo $html;
         break;
-    case 'userRequest':
-        $clientId = $_SESSION['user_id'];
-        $userRequests = getUserRequest($clientId);
-        echo json_encode($userRequests);
+    case 'clientRequest':
+        $clientId = $_SESSION['clientId'];
+        $clientRequests = getClientRequests($clientId);
+        echo json_encode($clientRequests);
         break;
     case 'requestedBooks':
-        $userId = $_SESSION['user_id'];
+        $clientId = $_SESSION['clientId'];
         // Get JSON data from the client
         $jsonData = file_get_contents('php://input');
         $data = json_decode($jsonData, true);
         foreach ($data as $book) {
             $bookId = $book['book_id'];
-            addRequest($userId, $bookId);
+            $startDate = $book['startDate'];
+            $endDate = $book['endDate'];
+            addBookRequest($clientId, $bookId, $startDate, $endDate);
         }
         $message = array("message" => "successful");
+        echo json_encode($message);
+        break;
+    case 'clientBooks':
+        // Get JSON data from the client
+        $jsonData = file_get_contents('php://input');
+        $data = json_decode($jsonData, true);
+        // Process the JSON data
+        $searchedValue = $data['searchedValue'];
+        $clientBooks =clientBooks($searchedValue);
+        $message = array("message" => "successful", "data" => $clientBooks);
+        echo json_encode($message);
+        break;
+    case 'received':
+        $jsonData = file_get_contents('php://input');
+        $data = json_decode($jsonData, true);
+        // Process the JSON data
+        $bookId = $data['bookId'];
+        $queryResponse = lendingsStatusUpdate($bookId);
+        $message = array("message" => $queryResponse);
         echo json_encode($message);
         break;
     default:

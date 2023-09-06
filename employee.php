@@ -1,4 +1,10 @@
 <?php
+session_start();
+if(!isset($_SESSION['employeeId'])){
+    header('Location: login.php');
+    exit();
+}
+echo $_SESSION['employeeId'];
 require_once './includes/functions.php';
 $sectionNames = getSectionNames();
 $title = 'employee page';
@@ -44,6 +50,22 @@ include './header.php';
         </label>
         <button id="submit-book">ADD Book</button>
     </form>
+    <!-- searching clients by thier name or email and showing their books -->
+    <form class="search-client">
+        <div> Searching clients by name</div>
+        <label for="search-client-label">Search</label>
+        <input id="search-client-input" type="text" placeholder="type name or email of client">
+        <button id="submit-search-client">Search</button>
+        <div class="client-search-results"></div>
+    </form>
+    <div class="client-books">
+        <table id="client-books-table">
+        </table>
+    </div>
+    <div id="received-book-by-employee">
+        <input id="received-book-input" type="text" placeholder="enter the request id">
+        <button id="received-btn">receive book</button>
+    </div>
 </div>
 <?php include './footer.php' ?>
 <script>readRequests();</script>
