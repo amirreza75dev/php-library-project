@@ -1,14 +1,12 @@
 <?php
-session_start();
+$title = 'employee page';
+include './header.php';
 if(!isset($_SESSION['employeeId'])){
     header('Location: login.php');
     exit();
 }
-echo $_SESSION['employeeId'];
 require_once './includes/functions.php';
 $sectionNames = getSectionNames();
-$title = 'employee page';
-include './header.php';
  ?>
 <!DOCTYPE html>
 <html lang="en">

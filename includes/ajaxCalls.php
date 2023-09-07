@@ -107,8 +107,8 @@ switch ($action) {
             $bookAuthor = $book['author_name'];
             $bookId = $book['book_id'];
             $bookAvailableNumbers= $book['available_numbers'];
-            $trId = ($bookAvailableNumbers < 1)? 'notAvailable': '';
-            $html .= "<tr info='$bookId' id='$trId'>
+            $trClass = ($bookAvailableNumbers < 1)? 'notAvailable': '';
+            $html .= "<tr info='$bookId' class='$trClass'>
                                     <td>$bookAuthor</td>
                                     <td info='book-name'>$bookName</td>
                                     <td>
@@ -134,12 +134,10 @@ switch ($action) {
         // Get JSON data from the client
         $jsonData = file_get_contents('php://input');
         $data = json_decode($jsonData, true);
-        foreach ($data as $book) {
-            $bookId = $book['book_id'];
-            $startDate = $book['startDate'];
-            $endDate = $book['endDate'];
-            addBookRequest($clientId, $bookId, $startDate, $endDate);
-        }
+        $bookId = $data['book_id'];
+        $startDate = $data['startDate'];
+        $endDate = $data['endDate'];
+        addBookRequest($clientId, $bookId, $startDate, $endDate);
         $message = array("message" => "successful");
         echo json_encode($message);
         break;
@@ -157,8 +155,8 @@ switch ($action) {
         $jsonData = file_get_contents('php://input');
         $data = json_decode($jsonData, true);
         // Process the JSON data
-        $bookId = $data['bookId'];
-        $queryResponse = lendingsStatusUpdate($bookId);
+        $requestId = $data['requestId'];
+        $queryResponse = lendingsStatusUpdate($requestId);
         $message = array("message" => $queryResponse);
         echo json_encode($message);
         break;

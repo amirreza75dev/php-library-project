@@ -4,7 +4,7 @@ include './header.php';
 ?>
 <div class="login-page-box">
     <form class="login-container">
-        <input id="name" type="email" class="clientname" placeholder="enter email" required>
+        <input id="name" type="email" class="client-name" placeholder="enter email" required>
         <input id="pass" type="password" class="pwd" placeholder="enter password" required>
         <div class="radio-btns">
             <label for="client-btn">client

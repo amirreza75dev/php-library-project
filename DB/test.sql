@@ -169,21 +169,5 @@ INSERT INTO clients (client_name, email, password) VALUES
     ('Client 14', 'client14@example.com', 'password14'),
     ('Client 15', 'client15@example.com', 'password15');
 
--- Dummy data for requests table
-INSERT INTO requests (client_id, book_id, status) VALUES
-    (1, 1, 'pending'),
-    (2, 2, 'pending'),
-    (3, 3, 'pending'),
-    (4, 4, 'accepted'),
-    (5, 5, 'pending'),
-    (6, 6, 'accepted');
 
--- Dummy data for lendings table
-INSERT INTO lendings (employee_id, request_id) VALUES
-    (1, 1),
-    (2, 2),
-    (3, 3),
-    (4, 4),
-    (5, 5),
-    (6, 6);
 

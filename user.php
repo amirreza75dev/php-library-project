@@ -1,11 +1,10 @@
 <?php 
-session_start();
+$title = 'client page';
+include './header.php';
 if(!isset($_SESSION['clientId'])){
     header('Location: login.php');
     exit();
 }
-$title = 'client page';
-include './header.php';
 ?>
 <div class="main">
     <div class="requests_client">

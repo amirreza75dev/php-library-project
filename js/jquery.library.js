@@ -96,7 +96,7 @@ $(function () {
             $('.num-char').css('display', 'block');
         }
     })
-    $('#pass-check').on('keyup',function checkPasswordRepeat() {
+    $('#pass-check').on('keyup',function() {
         // Reset  error message
         $('.repeat-pass').css('display', 'none');
         // password and password repeat value
@@ -109,6 +109,8 @@ $(function () {
         // checking all conditions for activating submit button
         if (value.match(number) && value.match(specialCharacters) && value.match(alphabets) && value.length > 6 && repeatPassValue.match(value)) {
             $('#register-btn').removeAttr('disabled');
+        }else{
+            $('#register-btn').prop('disabled', true);
         }
     })
     // sending data to database with ajax 
@@ -145,7 +147,6 @@ $(function () {
     // client page javascripts    
     // submit requests
     $('#submit-orders').on('click', function () {
-        requestedBooks = []
         if ($("#book-inf").children().length > 0) {
             $("#book-inf").children().each(function () {
                 var infoValue = $(this).attr('info');
@@ -236,9 +237,9 @@ $(function () {
         $(this).parent().remove();
     })
     $('#received-btn').on('click',function(){
-        var bookId = $('#received-book-input').val();
+        var requestId = $('#received-book-input').val();
         var dataToSend = {
-            'bookId': bookId
+            'requestId': requestId
         }
         $.ajax({
             url: './includes/ajaxCalls.php?action=received',
@@ -259,6 +260,25 @@ $(function () {
             }
         });
     })
+        // telling to user book is not available
+        if($('.not-available').length > 0){
+            console.log('hi from not available');
+            allUnavailableBooks = $('.not-available')
+            var html= `<td>
+                                <p>this book is unavailable for lendings</p>
+                        </td>`
+            allUnavailableBooks.each(function(){
+                $(this).children().slice(-3).remove();
+                $(this).append(html)
+            })
+        }
+
+    // log out
+    $('#log-out-btn').on('click', function(){
+        window.location.href = "./logout.php"
+    })
+    
+
 });
 //functions 
 function readRequests(){
@@ -385,11 +405,12 @@ function books() {
     } 
 //adding request to waiting requests
 function addingRequest(individualBookRequest,infoValue){
+    var requestedBooks;
     var name = $(individualBookRequest).find('span').text();
     var startDate = $(individualBookRequest).find('span').attr('info-start');
     var endDate = $(individualBookRequest).find('span').attr('info-end');
     if (infoValue) {
-        requestedBooks.push({ "book": name, "book_id": infoValue, "startDate": startDate, "endDate": endDate });
+        requestedBooks={ "book": name, "book_id": infoValue, "startDate": startDate, "endDate": endDate };
     }
     $(individualBookRequest).remove()
     var html = ` <tr class="requested-book"  info = '${infoValue}'>
@@ -399,22 +420,22 @@ function addingRequest(individualBookRequest,infoValue){
                     <td>pending</td>
                 </tr>`
     $('#waiting-requests table').append(html);
-                // sending ajax requests to request-controler
-                $.ajax({
-                    url: './includes/ajaxCalls.php?action=requestedBooks',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(requestedBooks),
-                    success: function (response) {
-                        console.log(response);
-                        var parsedResponse = JSON.parse(response);
-                        if (parsedResponse.message == "successful") {
-                            console.log('requests send')
-                        } else {
-                            console.log(parsedResponse.message);
-                        }
-                    }
-                });
+    // sending ajax requests to request-controler
+    $.ajax({
+        url: './includes/ajaxCalls.php?action=requestedBooks',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(requestedBooks),
+        success: function (response) {
+            console.log(response);
+            var parsedResponse = JSON.parse(response);
+            if (parsedResponse.message == "successful") {
+                console.log('requests send')
+            } else {
+                console.log(parsedResponse.message);
+            }
+        }
+    });
 }
 // approving requets
 $('#approve-requests').on('click',function(){

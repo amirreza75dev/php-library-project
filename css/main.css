@@ -147,14 +147,16 @@ th {
     margin: 20px;
 }
 #received-book-by-employee{
-    width: 30%;
+    width: 40%;
     margin: 30px auto;
+    text-align: center;
 
 }
 #received-book-input{
     display: block;
     margin-bottom: 10px;
     padding: 20px;
+    margin: 10px auto;
 }
 /* search client books in emplyoee page */
 .search-client {
@@ -280,9 +282,11 @@ th {
     width: 160px;
     height: 16px;
 }
-#notAvailable{
+.not-available{
     color: red;
 }
-#notAvailable:hover{
-    
+#log-out-btn{
+    padding: 10px 30px;
+    margin: 30px;
+    cursor: pointer;
 }
