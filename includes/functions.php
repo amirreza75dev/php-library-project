@@ -204,16 +204,25 @@ function bookAvailabilityUpdate($updateStatement, $bookId)
             $sql = "UPDATE books
                     SET available_numbers = available_numbers + 1
                     WHERE book_id = :bookId";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':bookId', $bookId);
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':bookId', $bookId);
+            $stmt->execute();
+            return 'hi';
+
             break;
         case 'decrease':
             $sql = "UPDATE books
                     SET available_numbers = available_numbers - 1
                     WHERE book_id = :bookId";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':bookId', $bookId);
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':bookId', $bookId);
+            return $stmt->execute();
             break;
     endswitch;
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':bookId', $bookId);
-    return $stmt->execute();
 }
 function clientBooks($clientName)
 {
@@ -244,27 +253,101 @@ function lendingsStatusUpdate($requestId)
 {
     $pdo = getDatabaseConnection();
     // Check the current value of is_active
-    $sqlCheck = "SELECT l.is_active , r.book_id
+    $sqlCheck = "SELECT l.is_active , r.book_id , b.available_numbers
                  FROM lendings l
                  JOIN requests r ON l.request_id = r.request_id
+                 JOIN books b ON b.book_id = r.book_id
                  WHERE l.request_id = :requestId";
     $stmtCheck = $pdo->prepare($sqlCheck);
     $stmtCheck->bindParam(':requestId', $requestId);
     $stmtCheck->execute();
     $results = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+    $messages = array('activeStatusChanged' => '', 'reservationStatusChanged' => '', 'isRequestIdValid' => '');
     if (!empty($results)) {
         // Build and execute the update query
-        if ($results['is_active'] == 'yes') {
-            $sql = "UPDATE lendings SET is_active = 'no' WHERE request_id = :requestId";
+        if ($results['is_active'] == 'y') {
+            $sql = "UPDATE lendings SET is_active = 'n' WHERE request_id = :requestId";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':requestId', $requestId);
+            $stmt->execute();
+            // increasing available_numbers by 1
+            bookAvailabilityUpdate('increase', $results['book_id']);
+            $messages['activeStatusChanged'] = true;
         } else {
-            return false;
+            $messages['activeStatusChanged'] = false;
+            return $messages;
         }
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':requestId', $requestId);
-        // increasing available_numbers by 1
-        bookAvailabilityUpdate('increase', $results['book_id']);
-        return $stmt->execute();
+        // checking the number of books available for current book_id then checking whether there is any reserved books in request table or not
+        if ($results['available_numbers'] == 0) {
+            $bookId = $results['book_id'];
+            reservationStatusUpdate($bookId);
+            $messages['reservationStatusChanged'] = true;
+        }
+        $messages['isRequestIdValid'] = true;
+        return $messages;
     } else {
-        return 'unrecognised book id';
+        $messages['isRequestIdValid'] = false;
+        return $messages;
+    }
+}
+function reservationStatusUpdate($bookId)
+{
+    $pdo = getDatabaseConnection();
+    // Update the status of the oldest 'pending' reservation for the book
+    $sqlUpdate = "UPDATE requests
+                SET status = 'pending'
+                WHERE book_id = :bookId AND status = 'reserved'
+                ORDER BY created_at ASC
+                LIMIT 1";
+    $stmtUpdate = $pdo->prepare($sqlUpdate);
+    $stmtUpdate->bindParam(':bookId', $bookId);
+    $stmtUpdate->execute();
+    if ($stmtUpdate->rowCount() > 0) {
+        // Update was successful
+        echo "Reservation updated to 'pending' successfully!";
+    } else {
+        // No 'reserved' reservations found for the book
+        echo "No 'reserved' reservations found for the book.";
+        return false;
+    }
+}
+// add reservation to request table
+function addReservationRequest($clientId, $bookId, $status)
+{
+    $pdo = getDatabaseConnection();
+    $sql = "INSERT INTO requests (client_id, book_id, status) VALUES (:client_id, :book_id, :status)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':client_id', $clientId);
+    $stmt->bindParam(':book_id', $bookId);
+    $stmt->bindParam(':status', $status);
+    return $stmt->execute();
+}
+// getting books with reserved status
+function getReservedBooks($clientId)
+{
+    $pdo = getDatabaseConnection();
+    $sql = "SELECT
+                r.request_id,
+                r.status,
+                c.client_id,
+                b.book_id,
+                c.client_name,
+                b.book_name
+            FROM
+                requests r
+            JOIN
+                clients c ON r.client_id = c.client_id
+            JOIN
+                books b ON r.book_id = b.book_id
+            WHERE r.status = 'reserved' AND r.client_id = :clientId
+                    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':clientId', $clientId);
+    $stmt->execute();
+    if ($stmt->rowCount() > 0) {
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $results;
+    } else {
+        return array();
     }
 }

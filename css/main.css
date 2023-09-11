@@ -290,3 +290,19 @@ th {
     margin: 30px;
     cursor: pointer;
 }
+.reserved-books{
+    width: 30%;
+    margin: 0 auto;
+    border: 1px solid black;
+}
+.reserved-book-table{
+    width: 100%;
+    margin: 0 !important;
+    
+}
+
+.reserved-books{
+    text-align: center;
+    font-weight: bold;
+
+}

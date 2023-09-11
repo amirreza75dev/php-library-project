@@ -7,6 +7,11 @@ if(!isset($_SESSION['employeeId'])){
 }
 require_once './includes/functions.php';
 $sectionNames = getSectionNames();
+if(isset($_SESSION['employeeId'])){
+?>
+    <button id="log-out-btn">Log Out</button>
+<?php
+}
  ?>
 <!DOCTYPE html>
 <html lang="en">

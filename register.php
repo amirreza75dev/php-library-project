@@ -1,6 +1,11 @@
 <?php 
 $title = 'register page';
 include './header.php';
+if (isset($_SESSION['clientId']) || isset($_SESSION['employeeId'])){
+    // Redirect the user to another page, e.g., the homepage
+    header('Location: logout.php'); // Change 'homepage.php' to the desired destination page
+    exit();
+}
 ?>
     <form class="register-container">
         <input id="name" type="text" class="clientname" placeholder="enter name" required>

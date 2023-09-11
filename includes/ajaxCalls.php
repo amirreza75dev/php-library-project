@@ -99,31 +99,31 @@ switch ($action) {
         $message = array("message" => "successful");
         echo json_encode($message);
         break;
-    case 'books':
-        $bookArray = getAllbooks();
-        $html = '';
-        foreach ($bookArray as $book) {
-            $bookName = $book['book_name'];
-            $bookAuthor = $book['author_name'];
-            $bookId = $book['book_id'];
-            $bookAvailableNumbers= $book['available_numbers'];
-            $trClass = ($bookAvailableNumbers < 1)? 'notAvailable': '';
-            $html .= "<tr info='$bookId' class='$trClass'>
-                                    <td>$bookAuthor</td>
-                                    <td info='book-name'>$bookName</td>
-                                    <td>
-                                        <input type='date' id='start' name='start-date' min='".date('Y-m-d',strtotime('+1 day'))."' value='".date('Y-m-d',strtotime('+1 day'))."'>
-                                    </td>
-                                    <td>
-                                        <input type='date' id='end' name='end-date' value='".date('Y-m-d',strtotime('+3 weeks'))."'>                                 
-                                    </td>
-                                    <td>
-                                        <img class='book-req' src='./img/accept.png' alt='accept'>                                  
-                                    </td>                               
-                        </tr>";
-        }
-        echo $html;
-        break;
+    // case 'books':
+    //     $bookArray = getAllbooks();
+    //     $html = '';
+    //     foreach ($bookArray as $book) {
+    //         $bookName = $book['book_name'];
+    //         $bookAuthor = $book['author_name'];
+    //         $bookId = $book['book_id'];
+    //         $bookAvailableNumbers= $book['available_numbers'];
+    //         $trClass = ($bookAvailableNumbers < 1)? 'not-available': '';
+    //         $html .= "<tr info='$bookId' class='$trClass'>
+    //                                 <td>$bookAuthor</td>
+    //                                 <td info='book-name'>$bookName</td>
+    //                                 <td>
+    //                                     <input type='date' id='start' name='start-date' min='".date('Y-m-d',strtotime('+1 day'))."' value='".date('Y-m-d',strtotime('+1 day'))."'>
+    //                                 </td>
+    //                                 <td>
+    //                                     <input type='date' id='end' name='end-date' value='".date('Y-m-d',strtotime('+3 weeks'))."'>                                 
+    //                                 </td>
+    //                                 <td>
+    //                                     <img class='book-req' src='./img/accept.png' alt='accept'>                                  
+    //                                 </td>                               
+    //                     </tr>";
+    //     }
+    //     echo $html;
+        // break;
     case 'clientRequest':
         $clientId = $_SESSION['clientId'];
         $clientRequests = getClientRequests($clientId);
@@ -157,9 +157,19 @@ switch ($action) {
         // Process the JSON data
         $requestId = $data['requestId'];
         $queryResponse = lendingsStatusUpdate($requestId);
-        $message = array("message" => $queryResponse);
-        echo json_encode($message);
+        echo json_encode($queryResponse);
         break;
+        case 'reservedBooks':
+            $clientId = $_SESSION['clientId'];
+            // Get JSON data from the client
+            $jsonData = file_get_contents('php://input');
+            $data = json_decode($jsonData, true);
+            $bookId = $data['bookId'];
+            $status = 'reserved';
+            addReservationRequest($clientId, $bookId, $status);
+            $message = array("message" => "successful");
+            echo json_encode($message);
+            break;
     default:
         echo "Unknown action: $action";
 }

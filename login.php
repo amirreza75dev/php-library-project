@@ -1,6 +1,11 @@
 <?php
 $title = 'login page';
 include './header.php';
+if (isset($_SESSION['clientId']) || isset($_SESSION['employeeId'])){
+    // Redirect the user to another page, e.g., the homepage
+    header('Location: logout.php'); // Change 'homepage.php' to the desired destination page
+    exit();
+}
 ?>
 <div class="login-page-box">
     <form class="login-container">

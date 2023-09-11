@@ -3,7 +3,7 @@ create database if not exists library;
 CREATE TABLE sections(
     section_id INT(10) PRIMARY KEY NOT NULL AUTO_INCREMENT,
     section_name VARCHAR(100) NOT NULL,
-    active varchar(1) NOT NULL default 'Y'
+    is_active varchar(1) NOT NULL default 'Y'
 );
 CREATE TABLE authors(
     author_id int(10) PRIMARY KEY NOT NULL AUTO_INCREMENT,
@@ -47,13 +47,23 @@ CREATE TABLE requests(
     status varchar(50) NOT NULL DEFAULT 'pending',
     start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     end_date TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL 3 WEEK),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (book_id) REFERENCES books(book_id),
     FOREIGN KEY (client_id) REFERENCES clients(client_id)
 );
+-- CREATE TABLE reserved_books (
+--     reserved_book_id int(10) PRIMARY KEY NOT NULL AUTO_INCREMENT,
+--     reservation_status varchar(10) NOT NULL default 'pending',
+--     book_id int(10) NOT NULL,
+--     client_id int(10) NOT NULL,
+--     FOREIGN KEY (book_id) REFERENCES books(book_id),
+--     FOREIGN KEY (client_id) REFERENCES clients(client_id)
+-- );
 
 CREATE TABLE lendings(
     lending_id int(10) PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    is_active varchar(10) NOT NULL DEFAULT 'yes',
+    is_active varchar(10) NOT NULL DEFAULT 'y',
+    returned_date TIMESTAMP,
     employee_id int(10) NOT NULL,
     request_id int(10) NOT NULL,
     FOREIGN KEY (request_id) REFERENCES requests(request_id),
@@ -62,7 +72,7 @@ CREATE TABLE lendings(
 -- dummy data
 -- Insert dummy data into the 'sections' table
 -- Dummy data for sections table
-INSERT INTO sections (section_name, active) VALUES
+INSERT INTO sections (section_name, is_active) VALUES
     ('Fiction', 'Y'),
     ('Science', 'Y'),
     ('History', 'Y'),
@@ -128,10 +138,14 @@ INSERT INTO books (book_name, section_id, author_id, copies) VALUES
     ('Book 9', 6, 9, 5),
     ('Book 10', 4, 10, 3),
     ('Book 11', 7, 11, 2),
-    ('Book 12', 2, 12, 1),
-    ('Book 13', 1, 13, 4),
+    ('Book 12', 2, 12, 2),
+    ('Book 13', 1, 13, 2),
     ('Book 14', 8, 14, 2),
-    ('Book 15', 5, 15, 3);
+    ('Book 15', 8, 14, 0),
+    ('Book 16', 8, 14, 0),
+    ('Book 17', 8, 14, 1),
+    ('Book 18', 8, 14, 1),
+    ('Book 19', 5, 15, 1);
 
 -- Dummy data for books_authors table
 INSERT INTO books_authors (author_id, book_id) VALUES

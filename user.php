@@ -1,9 +1,17 @@
 <?php 
+require_once 'includes/functions.php';
 $title = 'client page';
 include './header.php';
 if(!isset($_SESSION['clientId'])){
     header('Location: login.php');
     exit();
+}
+$bookArray = getAllbooks();
+$reservedBooks = getReservedBooks($_SESSION['clientId']);
+if(isset($_SESSION['clientId'])){
+?>
+  <button id="log-out-btn">Log Out</button>
+<?php
 }
 ?>
 <div class="main">
@@ -24,6 +32,28 @@ if(!isset($_SESSION['clientId'])){
                 <th>end date</th>
                 <th>request</th>
             </tr>
+            <?php 
+                foreach ($bookArray as $book) {
+                $bookName = $book['book_name'];
+                $bookAuthor = $book['author_name'];
+                $bookId = $book['book_id'];
+                $bookAvailableNumbers= $book['available_numbers'];
+                $trClass = ($bookAvailableNumbers < 1)? 'not-available': '';
+                ?>
+                <tr info='<?php echo $bookId; ?>' class='<?php echo $trClass; ?>'>
+                    <td><?php echo $bookAuthor; ?></td>
+                    <td info='book-name'><?php echo $bookName; ?></td>
+                    <td>
+                        <input type='date' id='start' name='start-date' min='<?php echo date('Y-m-d', strtotime('+1 day')); ?>' value='<?php echo date('Y-m-d', strtotime('+1 day')); ?>'>
+                    </td>
+                    <td>
+                        <input type='date' id='end' name='end-date' value='<?php echo date('Y-m-d', strtotime('+3 weeks')); ?>'>                                 
+                    </td>
+                    <td>
+                        <img class='book-req' src='./img/accept.png' alt='accept'>                                  
+                    </td>                             
+                </tr>
+                <?php } ?>
         </table>
         <div id="waiting-requests">
             <div>your requests status</div>
@@ -33,6 +63,28 @@ if(!isset($_SESSION['clientId'])){
                     <th>start date</th>
                     <th>end date</th>
                     <th>status</th>
+                </tr>
+            </table>
+        </div>
+        <div class="reserved-books">
+            <div style="text-align: center;">your reserved books</div>
+            <table class="reserved-book-table">
+                <tr>                
+                    <th>book name</th>
+                    <th>status</th>
+                    <th>remove reservation</th>
+                    <?php 
+                    foreach ($reservedBooks as $book) {
+                    $bookName = $book['book_name'];
+                    $bookId = $book['book_id'];
+                    $requestId = $book['request_id'];
+                    ?>
+                    <tr class="reserved-book-info" info="<?php echo $bookId ?>">
+                        <td info='book-name'><?php echo $bookName; ?></td>
+                        <td>reserved</td>
+                        <td><button>click on me</button></td>                          
+                    </tr>
+                    <?php } ?>
                 </tr>
             </table>
         </div>
