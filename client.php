@@ -1,19 +1,19 @@
 <?php 
-require_once 'includes/functions.php';
-$title = 'client page';
-include './header.php';
-if(!isset($_SESSION['clientId'])){
-    header('Location: login.php');
+$title = 'Client page';
+require_once './header.php';
+
+$isClientLoggedIn = isClientLoggedIn();
+
+if(!$isClientLoggedIn){
+    header('Location: index.php?referrer=client');
     exit();
 }
+
 $bookArray = getAllbooks();
 $reservedBooks = getReservedBooks($_SESSION['clientId']);
-if(isset($_SESSION['clientId'])){
 ?>
-  <button id="log-out-btn">Log Out</button>
-<?php
-}
-?>
+<button id="log-out-btn">Log Out</button>
+
 <div class="main">
     <div class="requests_client">
         <div class="search-book">
@@ -38,7 +38,7 @@ if(isset($_SESSION['clientId'])){
                 $bookAuthor = $book['author_name'];
                 $bookId = $book['book_id'];
                 $bookAvailableNumbers= $book['available_numbers'];
-                $trClass = ($bookAvailableNumbers < 1)? 'not-available': '';
+                $trClass = ($bookAvailableNumbers < 1) ? 'not-available': '';
                 ?>
                 <tr info='<?php echo $bookId; ?>' class='<?php echo $trClass; ?>'>
                     <td><?php echo $bookAuthor; ?></td>
@@ -92,6 +92,5 @@ if(isset($_SESSION['clientId'])){
 <?php include './footer.php' ?>
  <!-- page specific js  -->
 <script>
-books();
 checkForUpdates();
 </script>

@@ -13,7 +13,7 @@ $(function () {
     event.preventDefault();
     var sectionId = $("#section-name").find("option:selected").val();
     var bookName = $("#book-name").val();
-    var authorId = $("#author-id").val();
+    var authorId = $("#author-name").find("option:selected").val();
     var avl = $("#avl").val();
     var requestData = {
       bookName: bookName,
@@ -146,7 +146,7 @@ $(function () {
         var parsedResponse = JSON.parse(response);
         console.log(parsedResponse);
         if (parsedResponse.message == "successful") {
-          window.location.href = "./login.php";
+          window.location.href = "./index.php";
         } else {
           console.log(parsedResponse.message);
         }
@@ -188,23 +188,27 @@ $(function () {
     }
   });
   // search functionality
-  $("#search").on("keyup", function () {
+  $("#search").on("keyup", delay(function () {
     var searchValue = $("#search").val().toLowerCase();
-    console.log(searchValue);
-    $("#data-container tr").each(function (index) {
-      // Skip the first row with th tags
-      if (index === 0) {
-        return true; // Continue to the next iteration
-      }
-      var bookName = $(this).find("td:eq(1)").text().toLowerCase();
-      console.log(bookName);
-      if (bookName.indexOf(searchValue) === -1) {
-        $(this).hide();
-      } else {
-        $(this).show();
-      }
-    });
-  });
+
+    if (searchValue.length >= 3) {
+      console.log(searchValue);
+      $("#data-container tr").each(function (index) {
+        // Skip the first row with th tags
+        if (index === 0) {
+          return true; // Continue to the next iteration
+        }
+        var bookName = $(this).find("td:eq(1)").text().toLowerCase();
+        console.log(bookName);
+        if (bookName.indexOf(searchValue) === -1) {
+          $(this).hide();
+        } else {
+          $(this).show();
+        }
+      });
+    }
+
+  }, 500));
   // searching client books in employee page
   $("#submit-search-client").on("click", function (event) {
     event.preventDefault();
@@ -360,8 +364,19 @@ $(function () {
   });
   // log out
   $("#log-out-btn").on("click", function () {
-    window.location.href = "./logout.php";
+    $.post({
+      url: "./includes/ajaxCalls.php?action=logout",
+      success: function (response) {
+        if (response === 'OK') {
+          window.location.href = "./index.php";
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("AJAX Error:", status, error);
+      }
+    });
   });
+
 });
 //functions
 function readRequests() {
@@ -412,39 +427,7 @@ function readRequests() {
     },
   });
 }
-function books() {
-  // Attach click event using event delegation to dynamically created elements
-  $("#data-container").on("click", ".book-req", function () {
-    var bookName = $(this).closest("tr").find("td[info='book-name']").text();
-    var bookId = $(this).closest("tr").attr("info");
-    var startDate = $(this).closest("tr").find("input[id='start']").val();
-    var endDate = $(this).closest("tr").find("input[id='end']").val();
-    if (startDate > endDate) {
-      alert("start date should be less than end date");
-      return;
-    } else {
-      // Create new HTML content
-      var orderedBookHtml = `<div info='${bookId}' class="order-box">
-                        <span info-start='${startDate}' info-end='${endDate}' class="ordered-book">${bookName} </span>
-                        <img class="cancel-order" src="img/decline.jpg" alt="">     
-                    </div>`;
-      // Loop through each element with the class 'order-box'
-      var requested = false;
-      $(".order-box").each(function () {
-        // Check if the info attribute matches the current bookId
-        if ($(this).attr("info") == bookId) {
-          requested = true;
-          alert("you put your order for this book before");
-          return false; // Exit the loop early if a match is found
-        }
-      });
-      // If the book is not already requested, append the HTML content
-      if (!requested) {
-        $("#book-inf").append(orderedBookHtml);
-      }
-    }
-  });
-}
+
 //check for updates function
 // Make an AJAX GET request
 function checkForUpdates() {
@@ -592,3 +575,14 @@ $("#approve-requests").on("click", function () {
   });
   alert("changed status has been sent successfully");
 });
+
+function delay(callback, ms) {
+  var timer = 0;
+  return function () {
+    var context = this, args = arguments;
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      callback.apply(context, args);
+    }, ms || 0);
+  };
+}

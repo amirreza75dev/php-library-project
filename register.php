@@ -1,9 +1,18 @@
 <?php 
 $title = 'register page';
-include './header.php';
-if (isset($_SESSION['clientId']) || isset($_SESSION['employeeId'])){
-    // Redirect the user to another page, e.g., the homepage
-    header('Location: logout.php'); // Change 'homepage.php' to the desired destination page
+require_once './header.php';
+
+$isClientLoggedIn = isClientLoggedIn();
+$isEmployeeLoggedIn = isEmployeeLoggedIn();
+
+$referrer = (isset($_REQUEST['referrer'])) ? $_REQUEST['referrer'] : "";
+
+if ($referrer === 'employee' && $isEmployeeLoggedIn) {
+    header('Location: employee.php'); 
+    exit();
+}
+if ($referrer === 'client' && $isClientLoggedIn) {
+    header('Location: client.php'); 
     exit();
 }
 ?>
