@@ -8,6 +8,7 @@
     <title><?php echo $title; ?></title>
     <?php
           session_start();
+          require_once './includes/functions.php';
     ?>
 </head>
 <body>

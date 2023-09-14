@@ -57,23 +57,35 @@ function getClient($email)
     $client = $stmt->fetch(PDO::FETCH_ASSOC);
     return $client;
 }
+
+function getAuthors() {
+    $pdo = getDatabaseConnection();
+
+    $sql = "select * from authors";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 // retriveing books
 function getAllBooks()
 {
     $pdo = getDatabaseConnection();
     $sql = "
                 SELECT 
-                    books.book_id,
-                    books.book_name,
-                    books.section_id,
-                    books.author_id,
-                    books.copies,
-                    books.available_numbers,
-                    authors.author_name
+                    b.book_id,
+                    b.book_name,
+                    b.section_id,
+                    b.author_id,
+                    b.copies,
+                    b.available_numbers,
+                    a.author_name
                 FROM
-                    books
+                    books b
                 INNER JOIN
-                    authors ON books.author_id = authors.author_id;
+                    authors a ON b.author_id = a.author_id
             ";
 
     $stmt = $pdo->prepare($sql);
@@ -85,9 +97,7 @@ function getAllBooks()
 function addBook($bookName, $sectionId, $authorId, $copies)
 {
     $pdo = getDatabaseConnection();
-    $sql = "
-                    INSERT INTO books (book_name, section_id, author_id, copies) VALUES (:book_name, :section_id, :section_id,:copies)
-                    ";
+    $sql = "INSERT INTO books (book_name, section_id, author_id, copies) VALUES (:book_name, :section_id, :section_id,:copies)";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':book_name', $bookName);
     $stmt->bindParam(':section_id', $sectionId);
@@ -206,22 +216,15 @@ function bookAvailabilityUpdate($updateStatement, $bookId)
                     WHERE book_id = :bookId";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':bookId', $bookId);
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindParam(':bookId', $bookId);
             $stmt->execute();
             return 'hi';
-
-            break;
         case 'decrease':
             $sql = "UPDATE books
                     SET available_numbers = available_numbers - 1
                     WHERE book_id = :bookId";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':bookId', $bookId);
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindParam(':bookId', $bookId);
             return $stmt->execute();
-            break;
     endswitch;
 }
 function clientBooks($clientName)
@@ -249,11 +252,11 @@ function clientBooks($clientName)
     return $clientBooks;
 }
 // a function for checking the end_date of previous requests to update availability of books
-function lendingsStatusUpdate($requestId)
+function lendingsStatusUpdate($requestId) 
 {
     $pdo = getDatabaseConnection();
     // Check the current value of is_active
-    $sqlCheck = "SELECT l.is_active , r.book_id , b.available_numbers
+    $sqlCheck = "SELECT l.is_active, r.book_id, b.available_numbers
                  FROM lendings l
                  JOIN requests r ON l.request_id = r.request_id
                  JOIN books b ON b.book_id = r.book_id
@@ -265,7 +268,7 @@ function lendingsStatusUpdate($requestId)
     $messages = array('activeStatusChanged' => '', 'reservationStatusChanged' => '', 'isRequestIdValid' => '');
     if (!empty($results)) {
         // Build and execute the update query
-        if ($results['is_active'] == 'y') {
+        if ($results['is_active'] === 'y') {
             $sql = "UPDATE lendings SET is_active = 'n' WHERE request_id = :requestId";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':requestId', $requestId);
@@ -297,7 +300,7 @@ function reservationStatusUpdate($bookId)
     $sqlUpdate = "UPDATE requests
                 SET status = 'pending'
                 WHERE book_id = :bookId AND status = 'reserved'
-                ORDER BY created_at ASC
+                ORDER BY created_at
                 LIMIT 1";
     $stmtUpdate = $pdo->prepare($sqlUpdate);
     $stmtUpdate->bindParam(':bookId', $bookId);
@@ -305,6 +308,7 @@ function reservationStatusUpdate($bookId)
     if ($stmtUpdate->rowCount() > 0) {
         // Update was successful
         echo "Reservation updated to 'pending' successfully!";
+        return true;
     } else {
         // No 'reserved' reservations found for the book
         echo "No 'reserved' reservations found for the book.";
@@ -346,8 +350,23 @@ function getReservedBooks($clientId)
     $stmt->execute();
     if ($stmt->rowCount() > 0) {
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return $results;
     } else {
-        return array();
+        $results = array();
     }
+
+    return $results;
+}
+
+function isClientLoggedIn() {
+    return isset($_SESSION['clientId']);
+}
+
+function isEmployeeLoggedIn() {
+    return isset($_SESSION['employeeId']);
+}
+
+function logout () {
+    session_unset(); // Unset all session variables
+    session_destroy(); // Destroy the session
+    echo 'OK';
 }

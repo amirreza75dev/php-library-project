@@ -1,28 +1,20 @@
 <?php
 $title = 'employee page';
-include './header.php';
-if(!isset($_SESSION['employeeId'])){
-    header('Location: login.php');
+require_once './header.php';
+
+$isEmployeeLoggedIn = isEmployeeLoggedIn();
+
+if (!$isEmployeeLoggedIn) {
+    header('Location: index.php?referrer=employee');
     exit();
+} else {
+    $sectionNames = getSectionNames();
+    $authors = getAuthors();
+
+    echo '<button id="log-out-btn">Log Out</button>';
 }
-require_once './includes/functions.php';
-$sectionNames = getSectionNames();
-if(isset($_SESSION['employeeId'])){
 ?>
-    <button id="log-out-btn">Log Out</button>
-<?php
-}
- ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/main.css">
-    <title>Employee Page</title>
-</head>
-<body>
+
 <div class="main">
     <div class="requests">
         <table id="pending-requests">
@@ -37,18 +29,28 @@ if(isset($_SESSION['employeeId'])){
         <label for="section-id">section name </br>
             <select name="section" id="section-name">
                 <?php
-                 $html ="";
-                 foreach($sectionNames as $section){
-                    $html .= "<option value='". $section["section_id"]. "'>".$section['section_name']."</option>";
-                } 
-                 echo $html;
+                $html = "";
+                foreach ($sectionNames as $section) {
+                    $html .= "<option value='" . $section["section_id"] . "'>" . $section['section_name'] . "</option>";
+                }
+                echo $html;
                 ?>
             </select>
         </label>
-        <label for="author-id">author id
-            <input id="author-id" type="number">
+        <label for="author-id">author
+            <select name="author" id="author-name">
+                <?php
+                $html = "";
+
+                foreach ($authors as $author) {
+                    $html .= "<option value='" . $author["author_id"] . "'>" . $author['author_name'] . "</option>";
+                }
+                echo $html;
+                ?>
+            </select>
+
         </label>
-        <label for="avl">availabe
+        <label for="avl">available
             <input id="avl" type="number">
         </label>
         <button id="submit-book">ADD Book</button>

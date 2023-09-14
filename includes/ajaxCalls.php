@@ -27,7 +27,7 @@ switch ($action) {
                 $_SESSION['clientId'] = $clientInf['client_id'];
                 $_SESSION['clientEmail'] = $clientInf['email'];
                 // Send a JSON response back to the client
-                $response = array('message' => 'successful', 'page' => './user.php');
+                $response = array('message' => 'successful', 'page' => './client.php');
                 echo json_encode($response);
             } else {
                 echo json_encode(array('message' => 'unsuccessful'));
@@ -99,31 +99,6 @@ switch ($action) {
         $message = array("message" => "successful");
         echo json_encode($message);
         break;
-    // case 'books':
-    //     $bookArray = getAllbooks();
-    //     $html = '';
-    //     foreach ($bookArray as $book) {
-    //         $bookName = $book['book_name'];
-    //         $bookAuthor = $book['author_name'];
-    //         $bookId = $book['book_id'];
-    //         $bookAvailableNumbers= $book['available_numbers'];
-    //         $trClass = ($bookAvailableNumbers < 1)? 'not-available': '';
-    //         $html .= "<tr info='$bookId' class='$trClass'>
-    //                                 <td>$bookAuthor</td>
-    //                                 <td info='book-name'>$bookName</td>
-    //                                 <td>
-    //                                     <input type='date' id='start' name='start-date' min='".date('Y-m-d',strtotime('+1 day'))."' value='".date('Y-m-d',strtotime('+1 day'))."'>
-    //                                 </td>
-    //                                 <td>
-    //                                     <input type='date' id='end' name='end-date' value='".date('Y-m-d',strtotime('+3 weeks'))."'>                                 
-    //                                 </td>
-    //                                 <td>
-    //                                     <img class='book-req' src='./img/accept.png' alt='accept'>                                  
-    //                                 </td>                               
-    //                     </tr>";
-    //     }
-    //     echo $html;
-        // break;
     case 'clientRequest':
         $clientId = $_SESSION['clientId'];
         $clientRequests = getClientRequests($clientId);
@@ -170,6 +145,9 @@ switch ($action) {
             $message = array("message" => "successful");
             echo json_encode($message);
             break;
+    case 'logout':
+        logout();
+        break;
     default:
         echo "Unknown action: $action";
 }
