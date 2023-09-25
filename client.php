@@ -47,7 +47,7 @@ $reservedBooks = getReservedBooks($_SESSION['clientId']);
                         <input type='date' id='start' name='start-date' min='<?php echo date('Y-m-d', strtotime('+1 day')); ?>' value='<?php echo date('Y-m-d', strtotime('+1 day')); ?>'>
                     </td>
                     <td>
-                        <input type='date' id='end' name='end-date' value='<?php echo date('Y-m-d', strtotime('+3 weeks')); ?>'>                                 
+                        <input type='date' id='end' name='end-date' min='<?php echo date('Y-m-d', strtotime('+1 day')); ?>' value='<?php echo date('Y-m-d', strtotime('+3 weeks')); ?>'>                                 
                     </td>
                     <td>
                         <img class='book-req' src='./img/accept.png' alt='accept'>                                  
@@ -93,4 +93,5 @@ $reservedBooks = getReservedBooks($_SESSION['clientId']);
  <!-- page specific js  -->
 <script>
 checkForUpdates();
+requestbook()
 </script>

@@ -145,8 +145,40 @@ switch ($action) {
             $message = array("message" => "successful");
             echo json_encode($message);
             break;
+        case 'addingBooksFromFile':
+            $file = $_FILES['file'];
+            // Check if the uploaded file is a CSV file
+            $fileExtension = pathinfo($file['name'], PATHINFO_EXTENSION);
+            if($fileExtension == 'csv'){
+                addingBooksFromFile($file['tmp_name']);
+            }else{
+
+            }
+            break;
     case 'logout':
         logout();
+        break;
+    case 'lendingsByDate':
+        $jsonData = file_get_contents('php://input');
+        $data = json_decode($jsonData, true);
+        // Process the JSON data
+        $date = $data['date'];
+        $results = getLendingsByDate($date);
+        if(empty($results)){
+            $message = array("message" => "false");
+            echo json_encode($message);
+        }else{
+            $message = array("message" => "true", "results"=>$results);
+            echo json_encode($message); 
+        }
+        break;
+        case 'clientProfile':
+            $jsonData = file_get_contents('php://input');
+            $data = json_decode($jsonData, true);
+            // Process the JSON data
+            $clientId = $data['clientId'];
+            $results = getClientAllBooks($clientId);
+            echo json_encode($results);
         break;
     default:
         echo "Unknown action: $action";

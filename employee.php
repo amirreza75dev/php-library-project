@@ -71,6 +71,28 @@ if (!$isEmployeeLoggedIn) {
         <input id="received-book-input" type="text" placeholder="enter the request id">
         <button id="received-btn">receive book</button>
     </div>
+    <div class="file-input">
+        <p>import file</p>
+        <input id="file-input" type ="file" name="books-file" accept=".csv">
+        <button id="submit-file">submit file</button>
+    </div>
+            </br>
+            </br>
+    <div class="lending-time">
+        <div class="">books that will be returned in a specific time</div>
+        <input class="lending-time-date" type="date" min='<?php echo date('Y-m-d '); ?>'>
+        <table class="lending-time-table">
+                    <tr>
+                      <th>book name</th>
+                      <th>client name</th>
+                      <th>client profile and books</th>
+                    </tr>
+
+        </table>
+    </div>
 </div>
 <?php include './footer.php' ?>
-<script>readRequests();</script>
+<script>
+readRequests();
+clientProfile();
+</script>

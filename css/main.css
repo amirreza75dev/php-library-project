@@ -304,5 +304,28 @@ th {
 .reserved-books{
     text-align: center;
     font-weight: bold;
+}
+.file-input{
+    margin: 0 auto;
+    width: 30%;
+}
+.lending-time{
+    width: 50%;
+    margin: 0 auto;
+}
+.profile-modal{
+    position: absolute;
+    padding: 20px;
+    width: 600px;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    background-color: #dddddd;
+}
+.close-modal{
+    position: absolute;
+    top: 0;
+    right: 0;
 
 }

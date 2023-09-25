@@ -188,27 +188,29 @@ $(function () {
     }
   });
   // search functionality
-  $("#search").on("keyup", delay(function () {
-    var searchValue = $("#search").val().toLowerCase();
+  $("#search").on(
+    "keyup",
+    delay(function () {
+      var searchValue = $("#search").val().toLowerCase();
 
-    if (searchValue.length >= 3) {
-      console.log(searchValue);
-      $("#data-container tr").each(function (index) {
-        // Skip the first row with th tags
-        if (index === 0) {
-          return true; // Continue to the next iteration
-        }
-        var bookName = $(this).find("td:eq(1)").text().toLowerCase();
-        console.log(bookName);
-        if (bookName.indexOf(searchValue) === -1) {
-          $(this).hide();
-        } else {
-          $(this).show();
-        }
-      });
-    }
-
-  }, 500));
+      if (searchValue.length >= 3) {
+        console.log(searchValue);
+        $("#data-container tr").each(function (index) {
+          // Skip the first row with th tags
+          if (index === 0) {
+            return true; // Continue to the next iteration
+          }
+          var bookName = $(this).find("td:eq(1)").text().toLowerCase();
+          console.log(bookName);
+          if (bookName.indexOf(searchValue) === -1) {
+            $(this).hide();
+          } else {
+            $(this).show();
+          }
+        });
+      }
+    }, 500)
+  );
   // searching client books in employee page
   $("#submit-search-client").on("click", function (event) {
     event.preventDefault();
@@ -367,16 +369,68 @@ $(function () {
     $.post({
       url: "./includes/ajaxCalls.php?action=logout",
       success: function (response) {
-        if (response === 'OK') {
+        if (response === "OK") {
           window.location.href = "./index.php";
         }
       },
       error: function (xhr, status, error) {
         console.error("AJAX Error:", status, error);
-      }
+      },
     });
   });
+  $("#submit-file").on("click", function () {
+    var fileInput = $("#file-input")[0].files[0];
+    if (fileInput && fileInput.name.indexOf(".csv") !== -1) {
+      var formData = new FormData();
+      formData.append("file", fileInput);
+      $.ajax({
+        url: "./includes/ajaxCalls.php?action=addingBooksFromFile",
+        type: "POST",
+        data: formData,
+        processData: false, // Prevent jQuery from processing the data
+        contentType: false, // Set content type to false as FormData handles it
+        success: function (response) {
+          // Handle the server's response
+          alert('books added successfully')
+        },
+        error: function (xhr, status, error) {
+          console.error(xhr.responseText);
+        },
+      });
+    }
+  });
+  $('.lending-time-date').on('change',function(){
+    var date = this.value
+    dataToSend = {
+      'date': date,
+    };
+    $.ajax({
+      url: "./includes/ajaxCalls.php?action=lendingsByDate",
+      type: "POST",
+      contentType: "application/json",
+      data: JSON.stringify(dataToSend),
+      success: function (response) {
+        var parsedResponse = JSON.parse(response);
+        if(parsedResponse.message=="true") {
+          var books= parsedResponse.results;
+          books.forEach(function(book){
+            console.log(book);
+            var tableRow = `<tr>
+                              <td>${book.book_name}</td>
+                              <td>${book.client_name}</td>
+                              <td client-id="${book.client_id}" class="client-profile">click</td>
+                            </tr>`
+            $('.lending-time-table').append(tableRow);
+          })
+      }else{
 
+      }},
+      error: function (xhr, status, error) {
+        console.error("AJAX Error:", status, error);
+      },
+    });
+
+  })
 });
 //functions
 function readRequests() {
@@ -579,10 +633,87 @@ $("#approve-requests").on("click", function () {
 function delay(callback, ms) {
   var timer = 0;
   return function () {
-    var context = this, args = arguments;
+    var context = this,
+      args = arguments;
     clearTimeout(timer);
     timer = setTimeout(function () {
       callback.apply(context, args);
     }, ms || 0);
   };
+}
+function requestbook() {
+  // Attach click event using event delegation to dynamically created elements
+  $("#data-container").on("click", ".book-req", function () {
+    var bookName = $(this).closest("tr").find("td[info='book-name']").text();
+    var bookId = $(this).closest("tr").attr("info");
+    var startDate = $(this).closest("tr").find("input[id='start']").val();
+    var endDate = $(this).closest("tr").find("input[id='end']").val();
+    if (startDate > endDate) {
+      alert("start date should be less than end date");
+      return;
+    } else {
+      // Create new HTML content
+      var orderedBookHtml = `<div info='${bookId}' class="order-box">
+                        <span info-start='${startDate}' info-end='${endDate}' class="ordered-book">${bookName} </span>
+                        <img class="cancel-order" src="img/decline.jpg" alt="">     
+                    </div>`;
+      // Loop through each element with the class 'order-box'
+      var requested = false;
+      $(".order-box").each(function () {
+        // Check if the info attribute matches the current bookId
+        if ($(this).attr("info") == bookId) {
+          requested = true;
+          alert("you put your order for this book before");
+          return false; // Exit the loop early if a match is found
+        }
+      });
+      // If the book is not already requested, append the HTML content
+      if (!requested) {
+        $("#book-inf").append(orderedBookHtml);
+      }
+    }
+  });
+}
+function clientProfile() {
+  // Attach click event using event delegation to dynamically created elements
+  $(".lending-time-table").on("click", ".client-profile", function () {
+    var clientId = $(this).attr("client-id")
+    var htmlModal = `<div class="profile-modal">
+                          <span class="close-modal">close modal</span>
+                    </div>`;
+    $('body').append(htmlModal);
+    console.log(htmlModal);
+    var dataToSend = {
+      'clientId' : clientId
+    }
+    $.ajax({
+      url: "./includes/ajaxCalls.php?action=clientProfile",
+      type: "POST",
+      contentType: "application/json",
+      data: JSON.stringify(dataToSend),
+      success: function (response) {
+        var parsedResponse = JSON.parse(response);
+        console.log(parsedResponse);
+        if(parsedResponse.length > 0) {
+          parsedResponse.forEach(function (book){
+            var html = `<div>
+                          <span>${book.book_name}</span>
+                          <span>${book.returned_date}</span>
+                      </div>`
+            $('.profile-modal').append(html)
+
+          })
+        }
+
+      },
+      error: function (xhr, status, error) {
+        console.error("AJAX Error:", status, error);
+      },
+    });
+  });
+    // Attach click event for the close button inside the modal (event delegation)
+    $("body").on("click", ".profile-modal .close-modal", function () {
+      // Close the modal or perform other actions
+      $(".profile-modal").remove(); // Remove the modal from the DOM
+    });
 }
