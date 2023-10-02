@@ -378,20 +378,31 @@ $(function () {
       },
     });
   });
-  $("#submit-file").on("click", function () {
+  $("#submit-file").on("click", function (event) {
+    event.preventDefault();
     var fileInput = $("#file-input")[0].files[0];
-    if (fileInput && fileInput.name.indexOf(".csv") !== -1) {
+    if (
+      fileInput &&
+      (fileInput.name.indexOf(".csv") !== -1 ||
+        fileInput.name.indexOf(".xml") ||
+        fileInput.name.indexOf(".json"))
+    ) {
       var formData = new FormData();
       formData.append("file", fileInput);
       $.ajax({
-        url: "./includes/ajaxCalls.php?action=addingBooksFromFile",
+        url: "./includes/ajaxCalls.php?action=importBooksFromFile",
         type: "POST",
         data: formData,
         processData: false, // Prevent jQuery from processing the data
         contentType: false, // Set content type to false as FormData handles it
         success: function (response) {
           // Handle the server's response
-          alert('books added successfully')
+          if (response == true) {
+            alert("books added successfully");
+          }
+          if (response == false) {
+            alert("please check the uploaded file");
+          }
         },
         error: function (xhr, status, error) {
           console.error(xhr.responseText);
@@ -399,10 +410,10 @@ $(function () {
       });
     }
   });
-  $('.lending-time-date').on('change',function(){
-    var date = this.value
+  $(".lending-time-date").on("change", function () {
+    var date = this.value;
     dataToSend = {
-      'date': date,
+      date: date,
     };
     $.ajax({
       url: "./includes/ajaxCalls.php?action=lendingsByDate",
@@ -411,26 +422,25 @@ $(function () {
       data: JSON.stringify(dataToSend),
       success: function (response) {
         var parsedResponse = JSON.parse(response);
-        if(parsedResponse.message=="true") {
-          var books= parsedResponse.results;
-          books.forEach(function(book){
+        if (parsedResponse.message == "true") {
+          var books = parsedResponse.results;
+          books.forEach(function (book) {
             console.log(book);
             var tableRow = `<tr>
                               <td>${book.book_name}</td>
                               <td>${book.client_name}</td>
                               <td client-id="${book.client_id}" class="client-profile">click</td>
-                            </tr>`
-            $('.lending-time-table').append(tableRow);
-          })
-      }else{
-
-      }},
+                            </tr>`;
+            $(".lending-time-table").append(tableRow);
+          });
+        } else {
+        }
+      },
       error: function (xhr, status, error) {
         console.error("AJAX Error:", status, error);
       },
     });
-
-  })
+  });
 });
 //functions
 function readRequests() {
@@ -677,15 +687,15 @@ function requestbook() {
 function clientProfile() {
   // Attach click event using event delegation to dynamically created elements
   $(".lending-time-table").on("click", ".client-profile", function () {
-    var clientId = $(this).attr("client-id")
+    var clientId = $(this).attr("client-id");
     var htmlModal = `<div class="profile-modal">
                           <span class="close-modal">close modal</span>
                     </div>`;
-    $('body').append(htmlModal);
+    $("body").append(htmlModal);
     console.log(htmlModal);
     var dataToSend = {
-      'clientId' : clientId
-    }
+      clientId: clientId,
+    };
     $.ajax({
       url: "./includes/ajaxCalls.php?action=clientProfile",
       type: "POST",
@@ -694,26 +704,24 @@ function clientProfile() {
       success: function (response) {
         var parsedResponse = JSON.parse(response);
         console.log(parsedResponse);
-        if(parsedResponse.length > 0) {
-          parsedResponse.forEach(function (book){
+        if (parsedResponse.length > 0) {
+          parsedResponse.forEach(function (book) {
             var html = `<div>
                           <span>${book.book_name}</span>
                           <span>${book.returned_date}</span>
-                      </div>`
-            $('.profile-modal').append(html)
-
-          })
+                      </div>`;
+            $(".profile-modal").append(html);
+          });
         }
-
       },
       error: function (xhr, status, error) {
         console.error("AJAX Error:", status, error);
       },
     });
   });
-    // Attach click event for the close button inside the modal (event delegation)
-    $("body").on("click", ".profile-modal .close-modal", function () {
-      // Close the modal or perform other actions
-      $(".profile-modal").remove(); // Remove the modal from the DOM
-    });
+  // Attach click event for the close button inside the modal (event delegation)
+  $("body").on("click", ".profile-modal .close-modal", function () {
+    // Close the modal or perform other actions
+    $(".profile-modal").remove(); // Remove the modal from the DOM
+  });
 }

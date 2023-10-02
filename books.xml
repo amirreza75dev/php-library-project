@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<library>
+    <book book_name="The Great Gatsby12" author="F. Scott Fitzgerald" section="Fiction" copies="10" />
+    <book book_name="To Kill a Mockingbird" author="Harper Lee" section="Fiction" copies="8" />
+    <book book_name="1984" author="George Orwell" section="Fiction" copies="12" />
+    <book book_name="Pride and Prejudice" author="Jane Austen" section="Romance" copies="6" />
+    <book book_name="The Catcher in the Rye" author="J.D. Salinger" section="Fiction" copies="9" />
+    <book book_name="The Catcher in the Rye" author="J.D. Salinger" section="Fiction" copies="9" />
+    <book book_name="book 2" author="author 20" section="Fiction" copies="9" />
+</library>

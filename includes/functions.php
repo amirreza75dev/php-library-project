@@ -67,7 +67,8 @@ function getClient($email)
     return $client;
 }
 
-function getAuthors() {
+function getAuthors()
+{
     $pdo = getDatabaseConnection();
 
     $sql = "select * from authors";
@@ -261,7 +262,7 @@ function clientBooks($clientName)
     return $clientBooks;
 }
 // a function for checking the end_date of previous requests to update availability of books
-function lendingsStatusUpdate($requestId) 
+function lendingsStatusUpdate($requestId)
 {
     $pdo = getDatabaseConnection();
     // Check the current value of is_active
@@ -366,120 +367,96 @@ function getReservedBooks($clientId)
     return $results;
 }
 
-function isClientLoggedIn() {
+function isClientLoggedIn()
+{
     return isset($_SESSION['clientId']);
 }
 
-function isEmployeeLoggedIn() {
+function isEmployeeLoggedIn()
+{
     return isset($_SESSION['employeeId']);
 }
 
-function logout () {
+function logout()
+{
     session_unset(); // Unset all session variables
     session_destroy(); // Destroy the session
     echo 'OK';
 }
 // adding books from csv file
-function addingBooksFromFile($file){
-    $handle = fopen($file,"r");
-    $counter = 0;
+function importBooksFromFile($file,$fileExtension)
+{
     $booksList = array();
-    $booksKeysValue = array('bookName','bookSection','bookAuthor','bookCopies');
-    while(! feof($handle)) {
-        $line = fgets($handle);
-        $line = trim($line);
-        if(!empty($line)){
-        if($counter==0){
-        // pass it
-        }else{
-        $bookInfo = explode(',', $line);  
-        $bookDetails = array();
-        for($i = 0; $i < count($bookInfo);$i++){
-            $bookDetails[$booksKeysValue[$i]] = $bookInfo[$i];
-        }
-        array_push($booksList,$bookDetails);
-        } 
-        $counter +=1;
-         }
-        }
-         fclose($handle);
-        $allBooksFromDatabae =getAllBooks();
-        $sectionNamesFromDatabase = getSectionNames();
-        $bookAuthorsFromDatabase = getAuthors();
-        print_r($booksList);
-        foreach($booksList as $book){
-            print_r('hi');
-            $bookNameFromFile = trim($book['bookName']);
-            $bookCopiesFromFile = $book['bookCopies'];
-            $matchedBook = false;
-            foreach($allBooksFromDatabae as $bookFromDatabase){
-                if(trim(strToLower($book['bookName'])) == trim(strToLower($bookFromDatabase['book_name']))){
-                    print_r('hi2');
-                    $pdo = getDatabaseConnection();
-                    $matchedBook = true;
-                    $numberofPreviousCopies = $bookFromDatabase['copies'];
-                    $allCopies = (int)$bookCopiesFromFile + (int)$numberofPreviousCopies;
-                    $availableNumbers = $bookFromDatabase['available_numbers'];
-                    $newAvailableNumbers = $availableNumbers + (int)$bookCopiesFromFile;
-                    $sql = 'UPDATE books set copies = :allCopies, available_numbers = :newAvailableNumbers
-                            WHERE book_name = :bookNameFromFile' ;
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->bindParam(':allCopies', $allCopies);
-                    $stmt->bindParam(':newAvailableNumbers', $newAvailableNumbers);
-                    $stmt->bindParam(':bookNameFromFile', $bookNameFromFile);
-                    $stmt->execute();
+    $booksKeysValue = array('bookName', 'bookSection', 'bookAuthor', 'bookCopies');
+    switch ($fileExtension) {
+        case 'csv':
+            $handle = fopen($file, "r");
+            $counter = 0;
+            while (!feof($handle)) {
+                $line = fgets($handle);
+                $line = trim($line);
+                if (!empty($line)) {
+                    if ($counter > 0) {
+                        $bookInfo = explode(',', $line);
+                        $bookDetails = array();
+                        for ($i = 0; $i < count($bookInfo); $i++) {
+                            $bookDetails[$booksKeysValue[$i]] = $bookInfo[$i];
+                        }
+                        array_push($booksList, $bookDetails);
+                    }
+                    $counter++;
                 }
             }
-            if(!$matchedBook){
-                print_r('hi3');
-                    $bookAuthor = $book['bookAuthor'];
-                    $authorFounded = false;
-                    $sectionId = null;
-                    $lastAuthorId = null;
-                    foreach($sectionNamesFromDatabase as $section){
-                        print_r('h4');
-                        if(strToLower($section['section_name']) == trim(strToLower($book['bookSection']))){
-                            $sectionId = $section['section_id'];
-                            
-                        }
-                    }
-                    foreach($bookAuthorsFromDatabase as $author){
-                        print_r('hi5');
-                        if(strToLower($author['author_name']) == strToLower($bookAuthor)){
-                            $authorFounded = true;
-                            $authorId = $author['author_id'];
-                            addBook($bookNameFromFile,$sectionId,$authorId,$bookCopiesFromFile);
-                            }
-                        $lastAuthorId = $author['author_id'];
-                        }
-                    if(!$authorFounded){
-                        print_r('hi6');
-                        // adding new author to database
-                        addAuthor($bookAuthor);
-                        $addedAuthorId = (int)$lastAuthorId + 1 ;
-                        addBook($bookNameFromFile,$sectionId,$addedAuthorId,$bookCopiesFromFile);
-                    }
+            fclose($handle);
+            addOrUpdateBook($booksList);
+            break;
+        case 'xml':
+            $xml = simplexml_load_file($file);
+            foreach($xml->book as $index => $book){
+                $bookDetails = array();
+                $bookDetails['bookName'] = $book['book_name'];
+                $bookDetails['bookAuthor'] = $book['author'];
+                $bookDetails['bookSection'] = $book['section'];
+                $bookDetails['bookCopies'] = $book['copies'];
+                array_push($booksList, $bookDetails);
             }
-        }
+            addOrUpdateBook($booksList);
+            break;
+        case 'json':
+            $jsonData = file_get_contents($file);
+            $books = json_decode($jsonData, true);
+            foreach ($books as $book) {
+                $bookDetails = array();
+                $bookDetails['bookName'] = $book['book_name'];
+                $bookDetails['bookAuthor'] = $book['author'];
+                $bookDetails['bookSection'] = $book['section'];
+                $bookDetails['bookCopies'] = $book['copies'];
+                array_push($booksList, $bookDetails);
+            }
+            addOrUpdateBook($booksList);
+            break;
+    }
 }
 // getting lendings by date
-function getLendingsByDate($date){
+function getLendingsByDate($date)
+{
     $pdo = getDatabaseConnection();
-    $sql="SELECT c.client_name, b.book_name, c.client_id
+    $sql = "SELECT c.client_name, b.book_name, c.client_id
           FROM lendings l 
           JOIN requests r ON l.request_id = r.request_id
           JOIN books b ON r.book_id = b.book_id
           JOIN clients c ON r.client_id = c.client_id
-          WHERE Date(returned_date) = :date AND  is_active = 'y'";
+          WHERE Date(returned_date) = :date AND  l.is_active = 'y'";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':date', $date);
     $stmt->execute();
     return $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 // all client books
-function getClientAllBooks($clientId){
+function getClientAllBooks($clientId)
+{
     $pdo = getDatabaseConnection();
-    $sql="SELECT b.book_name, l.returned_date
+    $sql = "SELECT b.book_name, l.returned_date
           FROM requests r
           JOIN books b ON r.book_id = b.book_id
           JOIN lendings l ON l.request_id = r.request_id
@@ -488,4 +465,61 @@ function getClientAllBooks($clientId){
     $stmt->bindParam(':clientId', $clientId);
     $stmt->execute();
     return $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+function addOrUpdateBook($booksList)
+{
+    $allBooksFromDatabase = getAllBooks();
+    $sectionNamesFromDatabase = getSectionNames();
+    $bookAuthorsFromDatabase = getAuthors();
+    print_r($booksList);
+    foreach ($booksList as $book) {
+        $bookNameFromFile = trim($book['bookName']);
+        $bookCopiesFromFile = $book['bookCopies'];
+        $matchedBook = false;
+
+        foreach ($allBooksFromDatabase as $bookFromDatabase) {
+            if (trim(strToLower($book['bookName'])) == trim(strToLower($bookFromDatabase['book_name']))) {
+                // edit it to a function
+                $pdo = getDatabaseConnection();
+                $matchedBook = true;
+                $numberofPreviousCopies = $bookFromDatabase['copies'];
+                $allCopies = (int) $bookCopiesFromFile + (int) $numberofPreviousCopies;
+                $availableNumbers = $bookFromDatabase['available_numbers'];
+                $newAvailableNumbers = $availableNumbers + (int) $bookCopiesFromFile;
+                $sql = 'UPDATE books set copies = :allCopies, available_numbers = :newAvailableNumbers
+                            WHERE book_name = :bookNameFromFile';
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindParam(':allCopies', $allCopies);
+                $stmt->bindParam(':newAvailableNumbers', $newAvailableNumbers);
+                $stmt->bindParam(':bookNameFromFile', $bookNameFromFile);
+                $stmt->execute();
+                break;
+            }
+        }
+        if (!$matchedBook) {
+            $bookAuthor = $book['bookAuthor'];
+            $authorFounded = false;
+            $sectionId = null;
+            $lastAuthorId = null;
+            foreach ($sectionNamesFromDatabase as $section) {
+                if (strToLower($section['section_name']) == trim(strToLower($book['bookSection']))) {
+                    $sectionId = $section['section_id'];
+                }
+            }
+            foreach ($bookAuthorsFromDatabase as $author) {
+                if (strToLower($author['author_name']) == strToLower($bookAuthor)) {
+                    $authorFounded = true;
+                    $authorId = $author['author_id'];
+                    addBook($bookNameFromFile, $sectionId, $authorId, $bookCopiesFromFile);
+                }
+                $lastAuthorId = $author['author_id'];
+            }
+            if (!$authorFounded) {
+                // adding new author to database
+                addAuthor($bookAuthor);
+                $addedAuthorId = (int) $lastAuthorId + 1;
+                addBook($bookNameFromFile, $sectionId, $addedAuthorId, $bookCopiesFromFile);
+            }
+        }
+    }
 }

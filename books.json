@@ -1,0 +1,32 @@
+[
+    {
+        "book_name": "The Great Novel",
+        "section": "Fiction",
+        "author": "John Smith",
+        "copies": 100
+    },
+    {
+        "book_name": "Programming in Python",
+        "section": "science",
+        "author": "Jane Doe",
+        "copies": 50
+    },
+    {
+        "book_name": "History of Art",
+        "section": "Fiction",
+        "author": "David Johnson",
+        "copies": 75
+    },
+    {
+        "book_name": "Science Fiction Adventures",
+        "section": "Fiction",
+        "author": "Alice Brown",
+        "copies": 120
+    },
+    {
+        "book_name": "Cooking Made Easy",
+        "section": "Cooking",
+        "author": "Michael White",
+        "copies": 90
+    }
+]

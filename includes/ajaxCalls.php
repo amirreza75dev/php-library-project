@@ -76,9 +76,9 @@ switch ($action) {
         $clientId = $data['clientId'];
         $bookId = $data['bookId'];
         if ($status == "accepted") {
-            bookAvailabilityUpdate('decrease',$bookId);
+            bookAvailabilityUpdate('decrease', $bookId);
             updateRequestStatus($status, $requestId);
-            addLending($employeeId,$requestId);
+            addLending($employeeId, $requestId);
             $message = array("message" => "lending request added");
             echo json_encode($message);
         } else {
@@ -122,7 +122,7 @@ switch ($action) {
         $data = json_decode($jsonData, true);
         // Process the JSON data
         $searchedValue = $data['searchedValue'];
-        $clientBooks =clientBooks($searchedValue);
+        $clientBooks = clientBooks($searchedValue);
         $message = array("message" => "successful", "data" => $clientBooks);
         echo json_encode($message);
         break;
@@ -134,27 +134,28 @@ switch ($action) {
         $queryResponse = lendingsStatusUpdate($requestId);
         echo json_encode($queryResponse);
         break;
-        case 'reservedBooks':
-            $clientId = $_SESSION['clientId'];
-            // Get JSON data from the client
-            $jsonData = file_get_contents('php://input');
-            $data = json_decode($jsonData, true);
-            $bookId = $data['bookId'];
-            $status = 'reserved';
-            addReservationRequest($clientId, $bookId, $status);
-            $message = array("message" => "successful");
-            echo json_encode($message);
-            break;
-        case 'addingBooksFromFile':
-            $file = $_FILES['file'];
-            // Check if the uploaded file is a CSV file
-            $fileExtension = pathinfo($file['name'], PATHINFO_EXTENSION);
-            if($fileExtension == 'csv'){
-                addingBooksFromFile($file['tmp_name']);
-            }else{
-
-            }
-            break;
+    case 'reservedBooks':
+        $clientId = $_SESSION['clientId'];
+        // Get JSON data from the client
+        $jsonData = file_get_contents('php://input');
+        $data = json_decode($jsonData, true);
+        $bookId = $data['bookId'];
+        $status = 'reserved';
+        addReservationRequest($clientId, $bookId, $status);
+        $message = array("message" => "successful");
+        echo json_encode($message);
+        break;
+    case 'importBooksFromFile':
+        $file = $_FILES['file'];
+        // Check if the uploaded file is a CSV file
+        $fileExtension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        if ($fileExtension == 'csv' || $fileExtension == 'xml' || $fileExtension == 'json') {
+            importBooksFromFile($file['tmp_name'],$fileExtension);
+            echo true;
+        } else {
+            echo false;
+        }
+        break;
     case 'logout':
         logout();
         break;
@@ -164,21 +165,21 @@ switch ($action) {
         // Process the JSON data
         $date = $data['date'];
         $results = getLendingsByDate($date);
-        if(empty($results)){
+        if (empty($results)) {
             $message = array("message" => "false");
             echo json_encode($message);
-        }else{
-            $message = array("message" => "true", "results"=>$results);
-            echo json_encode($message); 
+        } else {
+            $message = array("message" => "true", "results" => $results);
+            echo json_encode($message);
         }
         break;
-        case 'clientProfile':
-            $jsonData = file_get_contents('php://input');
-            $data = json_decode($jsonData, true);
-            // Process the JSON data
-            $clientId = $data['clientId'];
-            $results = getClientAllBooks($clientId);
-            echo json_encode($results);
+    case 'clientProfile':
+        $jsonData = file_get_contents('php://input');
+        $data = json_decode($jsonData, true);
+        // Process the JSON data
+        $clientId = $data['clientId'];
+        $results = getClientAllBooks($clientId);
+        echo json_encode($results);
         break;
     default:
         echo "Unknown action: $action";
