@@ -33,6 +33,18 @@ function addAuthor($authorName)
     $stmt->bindParam(':name', $authorName);
     return $stmt->execute();
 }
+
+function addSection($name)
+{
+    $pdo = getDatabaseConnection();
+
+    $sql = "INSERT INTO sections (section_name) VALUES (:name)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':name', $name);
+    
+    return $stmt->execute();
+}
+
 // get employee
 function getEmployee($email)
 {
@@ -66,7 +78,6 @@ function getClient($email)
     $client = $stmt->fetch(PDO::FETCH_ASSOC);
     return $client;
 }
-
 function getAuthors()
 {
     $pdo = getDatabaseConnection();
@@ -79,6 +90,18 @@ function getAuthors()
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+function getBookByName($name)
+{
+    $pdo = getDatabaseConnection();
+
+    $sql = "SELECT * FROM books WHERE book_name = :name";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':name', $name);
+    $stmt->execute();
+    $author = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $author;
+}
 // retriveing books
 function getAllBooks()
 {
@@ -115,6 +138,7 @@ function addBook($bookName, $sectionId, $authorId, $copies)
     $stmt->bindParam(':copies', $copies);
     return $stmt->execute();
 }
+
 // add request
 function addBookRequest($clientId, $bookId, $startDate, $endDate)
 {
@@ -384,7 +408,53 @@ function logout()
     echo 'OK';
 }
 // adding books from csv file
-function importBooksFromFile($file,$fileExtension)
+function importBooks($file, $extension)
+{
+    $booksList = array();
+    $booksFromFile = array();
+    $isCsv = false;
+
+    switch (strtolower($extension)) {
+        case 'csv':
+            $isCsv = true;
+            $lines = array_map('str_getcsv', file($file, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES));
+            $booksFromFile = array_slice($lines, 1);
+            break;
+        case 'xml':
+            $xml = simplexml_load_file($file);
+            $booksFromFile = (array) $xml->book;
+            break;
+        case 'json':
+            $jsonData = file_get_contents($file);
+            $booksFromFile = json_decode($jsonData, true);
+            break;
+        default:
+            throw new Exception('Unsupported extension');
+    }
+
+    foreach ($booksFromFile as $book) {
+
+        $bookName = ($isCsv) ? $book[0] : $book['book_name'];
+        $author = ($isCsv) ? $book[1] : $book['author'];
+        $section = ($isCsv) ? $book[2] : $book['section'];
+        $copies = ($isCsv) ? $book[3] : $book['copies'];
+
+        $bookDetails = array(
+            'bookName' => trim($bookName),
+            'bookAuthor' => trim($author),
+            'bookSection' => trim($section),
+            'bookCopies' => trim($copies)
+        );
+
+        array_push($booksList, $bookDetails);
+    }
+
+    insertOrUpdateBook($booksList);
+
+    return $booksList;
+}
+
+function importBooksFromFile($file, $fileExtension)
 {
     $booksList = array();
     $booksKeysValue = array('bookName', 'bookSection', 'bookAuthor', 'bookCopies');
@@ -412,7 +482,7 @@ function importBooksFromFile($file,$fileExtension)
             break;
         case 'xml':
             $xml = simplexml_load_file($file);
-            foreach($xml->book as $index => $book){
+            foreach ($xml->book as $index => $book) {
                 $bookDetails = array();
                 $bookDetails['bookName'] = $book['book_name'];
                 $bookDetails['bookAuthor'] = $book['author'];
@@ -466,12 +536,38 @@ function getClientAllBooks($clientId)
     $stmt->execute();
     return $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+function insertOrUpdateBook($booksList)
+{
+    $sectionNamesFromDatabase = getSectionNames();
+    $bookAuthorsFromDatabase = getAuthors();
+
+    foreach ($booksList as $bookFile) {
+        $bookDb = getBookByName(strToLower($bookFile['bookName']));
+        if (count($bookDb) > 0) {
+            updateBookFromFile($bookFile);
+        } else {
+            $foundAuthor = array_search($bookFile['author_name'], array_column($bookAuthorsFromDatabase, 'author_name'));
+            if (!$foundAuthor) {
+                addAuthor($bookFile['author_name']);
+            }
+
+            $foundSection = array_search($bookFile['section_name'], array_column($sectionNamesFromDatabase, 'section_name'));
+            if (!$foundSection) {
+                addSection($bookFile['section_name']);
+            }
+
+           insertBookFromFile($bookFile);
+        }
+    }
+}
+
 function addOrUpdateBook($booksList)
 {
     $allBooksFromDatabase = getAllBooks();
     $sectionNamesFromDatabase = getSectionNames();
     $bookAuthorsFromDatabase = getAuthors();
-    print_r($booksList);
+
     foreach ($booksList as $book) {
         $bookNameFromFile = trim($book['bookName']);
         $bookCopiesFromFile = $book['bookCopies'];
